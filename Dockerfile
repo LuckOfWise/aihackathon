@@ -30,10 +30,23 @@ ENV RAILS_ENV="production" \
 # Throw-away build stage to reduce size of final image
 FROM base AS build
 
-# Install packages needed to build gems
+# Install packages needed to build gems and JS assets
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential git libpq-dev libvips libyaml-dev pkg-config && \
+    apt-get install --no-install-recommends -y build-essential git libpq-dev libvips libyaml-dev pkg-config xz-utils && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
+
+# Install Node.js and Yarn for Vite asset build
+ARG NODE_VERSION=25.9.0
+ARG YARN_VERSION=1.22.22
+ENV PATH=/usr/local/node/bin:$PATH
+RUN ARCH=$(uname -m) && \
+    if [ "$ARCH" = "x86_64" ]; then NODE_ARCH="x64"; \
+    elif [ "$ARCH" = "aarch64" ]; then NODE_ARCH="arm64"; \
+    else echo "Unsupported arch: $ARCH" && exit 1; fi && \
+    curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${NODE_ARCH}.tar.xz" | tar -xJ -C /usr/local/ && \
+    mv "/usr/local/node-v${NODE_VERSION}-linux-${NODE_ARCH}" /usr/local/node && \
+    corepack enable && \
+    corepack prepare "yarn@${YARN_VERSION}" --activate
 
 # Install application gems
 COPY vendor/* ./vendor/
@@ -43,6 +56,10 @@ RUN bundle install && \
     rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
     # -j 1 disable parallel compilation to avoid a QEMU bug: https://github.com/rails/bootsnap/issues/495
     bundle exec bootsnap precompile -j 1 --gemfile
+
+# Install JavaScript dependencies
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile
 
 # Copy application code
 COPY . .
