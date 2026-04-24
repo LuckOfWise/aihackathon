@@ -1,0 +1,27 @@
+{
+  "name": "aihackathon",
+  "private": true,
+  "type": "module",
+  "packageManager": "yarn@1.22.22",
+  "scripts": {
+    "lint:eslint": "eslint app/frontend",
+    "lint:stylelint": "stylelint \"app/assets/stylesheets/**/*.scss\"",
+    "lint:tsc": "tsc --noEmit",
+    "lint": "yarn lint:eslint && yarn lint:stylelint && yarn lint:tsc"
+  },
+  "devDependencies": {
+    "@sonicgarden/eslint-plugin": "^1.0.1",
+    "@sonicgarden/prettier-config": "^0.0.1",
+    "@sonicgarden/stylelint-config": "^0.7.2",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "stylelint": "^16.0.0",
+    "typescript": "latest",
+    "vite": "^8.0.9",
+    "vite-plugin-ruby": "^5.2.1"
+  },
+  "dependencies": {
+    "@hotwired/stimulus": "latest",
+    "@hotwired/turbo-rails": "latest"
+  }
+}

@@ -1,0 +1,19 @@
+default: &default
+  anthropic:
+    service: "Anthropic"
+    access_token: <%= Rails.application.credentials.dig(:anthropic, :access_token) %>
+    model: "claude-sonnet-4-5"
+    temperature: 0.7
+
+development:
+  <<: *default
+
+test:
+  <<: *default
+  anthropic:
+    service: "Anthropic"
+    access_token: "test"
+    model: "claude-sonnet-4-5"
+
+production:
+  <<: *default

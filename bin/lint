@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -e
+
+echo "== rubocop =="
+bundle exec rubocop
+
+echo "== erb_lint =="
+bundle exec erb_lint --lint-all
+
+echo "== eslint =="
+yarn lint:eslint
+
+echo "== stylelint =="
+yarn lint:stylelint
+
+echo "== tsc =="
+yarn lint:tsc

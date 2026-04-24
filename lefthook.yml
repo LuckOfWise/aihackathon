@@ -1,0 +1,22 @@
+pre-commit:
+  parallel: true
+  commands:
+    rubocop:
+      glob: "*.{rb,rake}"
+      run: bundle exec rubocop --force-exclusion {staged_files}
+    erb_lint:
+      glob: "*.erb"
+      run: bundle exec erb_lint {staged_files}
+    eslint:
+      glob: "app/frontend/**/*.{js,ts,tsx}"
+      run: yarn eslint {staged_files}
+    stylelint:
+      glob: "app/assets/stylesheets/**/*.scss"
+      run: yarn stylelint {staged_files}
+
+pre-push:
+  commands:
+    brakeman:
+      run: bin/brakeman --no-pager --quiet
+    bundler-audit:
+      run: bin/bundler-audit

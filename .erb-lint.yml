@@ -1,0 +1,12 @@
+---
+linters:
+  ErbSafety:
+    enabled: true
+  FinalNewline:
+    enabled: true
+  ParserErrors:
+    enabled: true
+  SpaceInHtmlTag:
+    enabled: true
+  NoJavascriptTagHelper:
+    enabled: true

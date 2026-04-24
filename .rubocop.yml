@@ -1,0 +1,15 @@
+inherit_gem:
+  sgcop: rails/rubocop.yml
+
+AllCops:
+  TargetRubyVersion: 3.4
+  NewCops: enable
+  Exclude:
+    - "bin/**/*"
+    - "db/**/*"
+    - "node_modules/**/*"
+    - "tmp/**/*"
+    - "vendor/**/*"
+    - "public/**/*"
+    - "storage/**/*"
+    - "config/environments/*.rb"

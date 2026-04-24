@@ -1,0 +1,14 @@
+.home {
+  max-width: var(--container-focus);
+  margin: 0 auto;
+  padding: var(--space-2xl) var(--space-md);
+}
+
+.home__title {
+  margin-bottom: var(--space-md);
+}
+
+.home__lede {
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-lg);
+}
