@@ -2,7 +2,7 @@
   <header class="page__header">
     <div>
       <div class="page__title-group">
-        <% if back_to? %>
+        <% if back_to %>
           <%= link_to back_to, class: 'page__back-icon', title: '戻る' do %>
             <%= render Ui::IconComponent.new(name: 'arrow-left') %>
           <% end %>

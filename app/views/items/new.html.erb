@@ -1,7 +1,5 @@
 <% content_for :title, '新規アイテム' %>
 
-<%= render Ui::PageComponent.new(title: '新規アイテム', width: :form) do |page| %>
-  <% page.with_back_to(items_path) %>
-
+<%= render Ui::PageComponent.new(title: '新規アイテム', width: :form, back_to: items_path) do %>
   <%= render 'form', item: @item %>
 <% end %>

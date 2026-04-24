@@ -3,14 +3,14 @@ class Ui::PageComponent < ApplicationComponent
 
   renders_one :actions
   renders_one :lede
-  renders_one :back_to
 
-  def initialize(title:, width: :full)
+  def initialize(title:, width: :full, back_to: nil)
     @title = title
     @width = width.to_sym
+    @back_to = back_to
   end
 
-  attr_reader :title, :width
+  attr_reader :title, :width, :back_to
 
   def width_attr
     width == :full ? nil : width
