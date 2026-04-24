@@ -1,0 +1,15 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  host:     <%= ENV.fetch("DB_HOST", "localhost") %>
+  username: <%= ENV.fetch("DB_USER", "aihackathon") %>
+  password: <%= ENV.fetch("DB_PASSWORD", "aihackathon") %>
+
+development:
+  <<: *default
+  database: <%= ENV.fetch("DB_NAME", "aihackathon_development") %>
+
+test:
+  <<: *default
+  database: <%= ENV.fetch("DB_NAME_TEST", "aihackathon_test") %>

@@ -1,0 +1,36 @@
+<div class="field">
+  <label for="<%= input_id %>" class="field__label">
+    <%= label %><% if required %><span class="field__required" aria-hidden="true">*</span><% end %>
+  </label>
+
+  <% if textarea? %>
+    <textarea
+      id="<%= input_id %>"
+      name="<%= name %>"
+      class="field__input"
+      rows="<%= rows || 4 %>"
+      placeholder="<%= placeholder %>"
+      <%= 'required' if required %>
+      aria-invalid="<%= error? %>"
+    ><%= value %></textarea>
+  <% else %>
+    <input
+      id="<%= input_id %>"
+      name="<%= name %>"
+      type="<%= type %>"
+      value="<%= value %>"
+      class="field__input"
+      placeholder="<%= placeholder %>"
+      <%= 'required' if required %>
+      aria-invalid="<%= error? %>"
+    >
+  <% end %>
+
+  <% if hint? %>
+    <p class="field__hint"><%= hint %></p>
+  <% end %>
+
+  <% if error? %>
+    <p class="field__error"><%= error %></p>
+  <% end %>
+</div>

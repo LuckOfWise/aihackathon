@@ -44,3 +44,8 @@ node_modules
 # https://vitejs.dev/guide/env-and-mode.html#env-files
 *.local
 
+# Claude Code preview
+/.claude/launch.json
+/.claude/worktrees/
+/.claude/*.db
+

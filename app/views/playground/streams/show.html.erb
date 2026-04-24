@@ -1,0 +1,28 @@
+<% content_for :title, 'Chat (Agent)' %>
+
+<%= render Ui::PageComponent.new(title: 'Chat Agent', width: :form) do |page| %>
+  <% page.with_lede do %>
+    <code>ChatAgent#reply</code> — 基本的なテキスト in / テキスト out。
+    テーマが決まったら <code>instructions</code> を書き換えて性格を変える。
+  <% end %>
+
+  <%= form_with url: playground_stream_path, method: :post, class: 'playground__form' do |f| %>
+    <div class="field">
+      <%= f.label :message, '質問・指示', class: 'field__label' %>
+      <%= f.text_area :message, value: @message, class: 'field__input', rows: 4, placeholder: '例: AIハッカソンで何作ればウケる？', required: true %>
+    </div>
+
+    <div class="playground__actions">
+      <%= f.submit '送信', class: 'button', data: { variant: 'primary' } %>
+    </div>
+  <% end %>
+
+  <% if @response.present? %>
+    <div class="page__section">
+      <p class="page__section-label">Response</p>
+      <%= render Ui::CardComponent.new do %>
+        <div class="playground__response"><%= simple_format(@response) %></div>
+      <% end %>
+    </div>
+  <% end %>
+<% end %>

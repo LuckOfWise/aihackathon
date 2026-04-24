@@ -1,0 +1,7 @@
+<div class="stat">
+  <span class="stat__label"><%= label %></span>
+  <span class="stat__value"><%= value %></span>
+  <% if delta.present? %>
+    <span class="stat__delta" data-direction="<%= delta_direction %>"><%= delta %></span>
+  <% end %>
+</div>

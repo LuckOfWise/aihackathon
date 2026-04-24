@@ -1,0 +1,41 @@
+<% content_for :title, 'Vision (Agent)' %>
+
+<%= render Ui::PageComponent.new(title: 'Vision Agent', width: :form) do |page| %>
+  <% page.with_lede do %>
+    <code>VisionAgent#describe</code> — 画像をBase64でAPIに送り、説明文を得る。
+    ファイル入力を Data URL に変換してから渡す雛形。
+  <% end %>
+
+  <%= form_with url: playground_vision_path, method: :post, class: 'playground__form', multipart: true do |f| %>
+    <div class="field">
+      <%= f.label :image, '画像ファイル', class: 'field__label' %>
+      <%= f.file_field :image, accept: 'image/png,image/jpeg,image/webp', class: 'field__input', required: true %>
+      <p class="field__hint">PNG / JPEG / WebP のみ</p>
+    </div>
+
+    <div class="field">
+      <%= f.label :instruction, '指示（任意）', class: 'field__label' %>
+      <%= f.text_area :instruction, value: @instruction, class: 'field__input', rows: 2, placeholder: '例: 写っている人数と表情を教えて' %>
+    </div>
+
+    <div class="playground__actions">
+      <%= f.submit '解析', class: 'button', data: { variant: 'primary' } %>
+    </div>
+  <% end %>
+
+  <% if @preview.present? %>
+    <div class="page__section">
+      <p class="page__section-label">Input</p>
+      <img src="<%= @preview %>" class="playground__image" alt="分析対象">
+    </div>
+  <% end %>
+
+  <% if @response.present? %>
+    <div class="page__section">
+      <p class="page__section-label">Response</p>
+      <%= render Ui::CardComponent.new do %>
+        <div class="playground__response"><%= simple_format(@response) %></div>
+      <% end %>
+    </div>
+  <% end %>
+<% end %>

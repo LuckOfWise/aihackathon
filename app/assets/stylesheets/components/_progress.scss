@@ -1,0 +1,29 @@
+.progress {
+  display: block;
+  width: 100%;
+  height: 6px;
+  background: var(--color-hover-bg);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+
+  &__fill {
+    height: 100%;
+    background: var(--color-primary);
+    border-radius: inherit;
+    transition: width var(--transition);
+  }
+
+  &[data-variant="success"] .progress__fill { background: var(--color-success); }
+  &[data-variant="warning"] .progress__fill { background: var(--color-warning); }
+  &[data-variant="danger"] .progress__fill { background: var(--color-danger); }
+
+  &.is-indeterminate .progress__fill {
+    width: 40%;
+    animation: progress-indeterminate 1.5s ease-in-out infinite;
+  }
+}
+
+@keyframes progress-indeterminate {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(250%); }
+}

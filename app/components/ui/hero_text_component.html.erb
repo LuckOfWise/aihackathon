@@ -1,0 +1,9 @@
+<div class="hero-text">
+  <% if mark.present? %>
+    <p class="hero-text__mark"><%= mark %></p>
+  <% end %>
+  <h1 class="hero-text__title"><%= title %></h1>
+  <% if lede? %>
+    <p class="hero-text__lede"><%= lede %></p>
+  <% end %>
+</div>

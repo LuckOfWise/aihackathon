@@ -1,0 +1,27 @@
+<nav class="navbar">
+  <% if brand? %>
+    <%= brand %>
+  <% end %>
+
+  <div class="navbar__menu">
+    <% links.each do |link| %>
+      <%= link %>
+    <% end %>
+
+    <% if user.present? %>
+      <div class="navbar__user" data-controller="dropdown">
+        <button type="button" class="navbar__user-pill" data-action="dropdown#toggle" aria-haspopup="true" aria-expanded="false">
+          <span class="navbar__avatar" aria-hidden="true"><%= avatar_initial %></span>
+          <span><%= user_display_name %></span>
+          <span class="navbar__chev" aria-hidden="true">
+            <%= render Ui::IconComponent.new(name: 'chevron-down', size: 14) %>
+          </span>
+        </button>
+
+        <div class="navbar__user-menu" data-dropdown-target="menu" hidden>
+          <%= user_menu %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</nav>

@@ -1,0 +1,38 @@
+<% content_for :title, 'Extract (Agent)' %>
+
+<%= render Ui::PageComponent.new(title: 'Extract Agent', width: :form) do |page| %>
+  <% page.with_lede do %>
+    <code>ExtractAgent#summarize</code> — テキストを JSON（title / summary / tags / sentiment）に構造化する。
+    <code>response_format: :json</code> で JSON モードを指示。
+  <% end %>
+
+  <%= form_with url: playground_extract_path, method: :post, class: 'playground__form' do |f| %>
+    <div class="field">
+      <%= f.label :text, '抽出対象テキスト', class: 'field__label' %>
+      <%= f.text_area :text, value: @text, class: 'field__input', rows: 6, placeholder: '例: 今日の会議で…', required: true %>
+    </div>
+
+    <div class="playground__actions">
+      <%= f.submit '抽出', class: 'button', data: { variant: 'primary' } %>
+    </div>
+  <% end %>
+
+  <% if @parsed.present? %>
+    <div class="page__section">
+      <p class="page__section-label">Parsed</p>
+      <dl class="spec-list">
+        <% @parsed.each do |k, v| %>
+          <div class="spec-list__row">
+            <dt><%= k %></dt>
+            <dd><%= v.is_a?(Array) ? v.join(' / ') : v %></dd>
+          </div>
+        <% end %>
+      </dl>
+    </div>
+  <% elsif @response.present? %>
+    <div class="page__section">
+      <p class="page__section-label">Raw Response</p>
+      <pre class="playground__json"><%= @response %></pre>
+    </div>
+  <% end %>
+<% end %>

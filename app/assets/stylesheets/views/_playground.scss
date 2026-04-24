@@ -1,0 +1,36 @@
+.playground__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.playground__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+}
+
+.playground__response {
+  color: var(--color-text);
+  line-height: 1.85;
+  white-space: pre-wrap;
+}
+
+.playground__image {
+  max-width: 100%;
+  border-radius: var(--radius);
+  border: 1px solid var(--color-border);
+}
+
+.playground__json {
+  margin: 0;
+  padding: var(--space-md);
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  white-space: pre-wrap;
+  overflow-x: auto;
+}

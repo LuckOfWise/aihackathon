@@ -1,0 +1,38 @@
+<%# locals: (item:) %>
+
+<%= form_with model: item, class: 'items__form', multipart: true do |f| %>
+  <% if item.errors.any? %>
+    <%= render Ui::AlertComponent.new(variant: :alert) do %>
+      <%= pluralize(item.errors.count, 'error') %> があります:
+      <ul style="margin: var(--space-xs) 0 0 1.2em;">
+        <% item.errors.full_messages.each do |msg| %><li><%= msg %></li><% end %>
+      </ul>
+    <% end %>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :title, class: 'field__label' %>
+    <%= f.text_field :title, class: 'field__input', required: true, placeholder: '例: 新機能アイデア' %>
+  </div>
+
+  <div class="field">
+    <%= f.label :body, class: 'field__label' %>
+    <%= f.text_area :body, class: 'field__input', rows: 6, placeholder: '詳細' %>
+  </div>
+
+  <div class="field">
+    <%= f.label :status, class: 'field__label' %>
+    <%= f.select :status, Item::STATUSES.map { |s| [s.to_s, s] }, {}, class: 'field__input' %>
+  </div>
+
+  <div class="field">
+    <%= f.label :image, '画像 (任意)', class: 'field__label' %>
+    <%= f.file_field :image, accept: 'image/*', class: 'field__input' %>
+    <p class="field__hint">JPEG / PNG / WebP 対応</p>
+  </div>
+
+  <div class="items__form-actions">
+    <%= link_to 'キャンセル', (item.persisted? ? item_path(item) : items_path), class: 'button', data: { variant: 'ghost' } %>
+    <%= f.submit (item.persisted? ? '更新' : '作成'), class: 'button', data: { variant: 'primary' } %>
+  </div>
+<% end %>

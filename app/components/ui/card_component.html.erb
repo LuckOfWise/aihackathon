@@ -1,0 +1,18 @@
+<article class="card">
+  <% if title? || title_text.present? || meta? %>
+    <header class="card__header">
+      <h2 class="card__title">
+        <%= title? ? title : title_text %>
+      </h2>
+      <% if meta? %>
+        <span class="card__meta"><%= meta %></span>
+      <% end %>
+    </header>
+  <% end %>
+
+  <div class="card__body"><%= content %></div>
+
+  <% if footer? %>
+    <footer class="card__footer"><%= footer %></footer>
+  <% end %>
+</article>

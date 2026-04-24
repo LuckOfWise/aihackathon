@@ -1,0 +1,19 @@
+.toast {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  width: fit-content;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-text);
+  color: var(--color-text-inverse);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  max-width: 400px;
+
+  &[data-variant="success"] { background: var(--color-success); }
+  &[data-variant="danger"] { background: var(--color-danger); }
+  &[data-variant="warning"] { background: var(--color-warning); }
+}

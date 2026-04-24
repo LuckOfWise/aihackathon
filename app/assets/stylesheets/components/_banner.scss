@@ -1,0 +1,27 @@
+.banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+
+  &[data-variant="info"] {
+    background: var(--color-primary-ring);
+    border-color: var(--color-primary);
+  }
+
+  &[data-variant="warning"] {
+    background: var(--color-warning-tint);
+    border-color: var(--color-warning);
+  }
+
+  &[data-variant="danger"] {
+    background: var(--color-danger-tint);
+    border-color: var(--color-danger);
+  }
+}

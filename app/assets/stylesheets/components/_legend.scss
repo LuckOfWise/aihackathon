@@ -1,0 +1,16 @@
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-sm) 0;
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+
+  &__item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+  }
+}

@@ -1,0 +1,10 @@
+<div class="more-menu" data-controller="dropdown">
+  <button type="button" class="more-menu__trigger" data-action="dropdown#toggle" aria-haspopup="true" aria-expanded="false" title="メニュー">
+    <%= render Ui::IconComponent.new(name: 'more-vertical') %>
+  </button>
+  <div class="more-menu__menu" data-dropdown-target="menu" hidden>
+    <% items.each do |item| %>
+      <button type="button" class="more-menu__item" data-variant="<%= item[:variant] %>"><%= item[:label] %></button>
+    <% end %>
+  </div>
+</div>

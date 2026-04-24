@@ -1,0 +1,11 @@
+.keyboard-shortcut {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+
+  &__plus {
+    color: var(--color-text-muted);
+    font-size: var(--text-xs);
+    line-height: 1;
+  }
+}

@@ -1,0 +1,18 @@
+.quote {
+  margin: 0;
+  padding: var(--space-sm) var(--space-md);
+  border-left: 3px solid var(--color-border-strong);
+  color: var(--color-text-secondary);
+  line-height: 1.75;
+
+  &__attribution {
+    display: block;
+    margin-top: var(--space-xs);
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+
+    &::before {
+      content: "— ";
+    }
+  }
+}

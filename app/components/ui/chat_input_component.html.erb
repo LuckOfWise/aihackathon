@@ -1,0 +1,6 @@
+<%= form_with url: action, method: method, class: 'chat-input' do |f| %>
+  <%= f.text_area name, value: value, placeholder: placeholder, class: 'chat-input__field', rows: 1 %>
+  <button type="submit" class="chat-input__submit" title="送信">
+    <%= render Ui::IconComponent.new(name: 'send', size: 16) %>
+  </button>
+<% end %>

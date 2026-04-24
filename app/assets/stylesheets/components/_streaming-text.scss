@@ -1,0 +1,20 @@
+.streaming-text {
+  line-height: 1.85;
+  color: var(--color-text);
+
+  &::after {
+    content: "▊";
+    display: inline-block;
+    margin-left: 2px;
+    color: var(--color-primary);
+    animation: streaming-caret 1s step-end infinite;
+  }
+}
+
+@keyframes streaming-caret {
+  50% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .streaming-text::after { animation: none; }
+}

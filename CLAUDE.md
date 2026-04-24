@@ -95,9 +95,15 @@ aihackathon/
 
 ## デザイン原則参照順序
 
-1. **[.claude/rules/design/principles.md](.claude/rules/design/principles.md)** — 普遍原則（4原則 + SaaSクリシェ回避）
-2. **[.claude/rules/design/ui-ux.md](.claude/rules/design/ui-ux.md)** — プロジェクト固有
-3. **[doc/agent/styles.md](doc/agent/styles.md)** — SCSS運用詳細
+1. **[DESIGN.md](DESIGN.md)** — Single source of truth（[google-labs-code/design.md](https://github.com/google-labs-code/design.md) 準拠 YAML トークン + 根拠 prose）。UI 実装前に必読。
+2. **[.claude/rules/design/principles.md](.claude/rules/design/principles.md)** — 普遍原則（4原則 + SaaSクリシェ回避）
+3. **[.claude/rules/design/ui-ux.md](.claude/rules/design/ui-ux.md)** — プロジェクト固有の詳細（Density Ladder / プロダクト品質チェックリスト）
+4. **[doc/agent/styles.md](doc/agent/styles.md)** — SCSS運用詳細
+
+**UI 変更時のチェック**:
+- 新しい色・サイズが必要 → `DESIGN.md` の YAML frontmatter にトークン追加 → `_variables.scss` に反映
+- 既存トークンで代用可能 → 追加せずトークン参照のみ
+- `DESIGN.md` を変更したら `npx @google/design.md lint DESIGN.md` で構造検証（WCAG / 参照切れチェック）
 
 ## 禁止事項
 

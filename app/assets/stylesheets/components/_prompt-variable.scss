@@ -1,0 +1,15 @@
+.prompt-variable {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  background: var(--color-primary-ring);
+  border: 1px dashed var(--color-primary);
+  border-radius: var(--radius-sm);
+  color: var(--color-primary);
+  font-family: var(--font-mono);
+  font-size: 0.95em;
+  line-height: 1.4;
+
+  &::before { content: "{{"; opacity: 0.6; }
+  &::after { content: "}}"; opacity: 0.6; }
+}

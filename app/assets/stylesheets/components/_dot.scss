@@ -1,0 +1,30 @@
+.dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-text-muted);
+  vertical-align: middle;
+
+  &[data-variant="primary"] { background: var(--color-primary); }
+  &[data-variant="success"] { background: var(--color-success); }
+  &[data-variant="warning"] { background: var(--color-warning); }
+  &[data-variant="danger"] { background: var(--color-danger); }
+  &[data-variant="info"] { background: var(--color-info); }
+
+  &[data-size="sm"] { width: 6px; height: 6px; }
+  &[data-size="lg"] { width: 10px; height: 10px; }
+
+  &.is-pulse {
+    animation: dot-pulse 1.5s ease-in-out infinite;
+  }
+}
+
+@keyframes dot-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dot.is-pulse { animation: none; }
+}

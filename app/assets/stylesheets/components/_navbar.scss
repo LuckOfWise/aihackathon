@@ -1,0 +1,109 @@
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-lg);
+}
+
+.navbar__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-md);
+  color: var(--color-text);
+  letter-spacing: var(--tracking-tight);
+}
+
+.navbar__menu {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-lg);
+}
+
+.navbar__link {
+  color: var(--color-text-secondary);
+  font-size: var(--text-base);
+  transition: color var(--transition);
+
+  &:hover {
+    color: var(--color-text);
+  }
+}
+
+.navbar__user {
+  position: relative;
+}
+
+.navbar__user-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-xs) var(--space-md) var(--space-xs) var(--space-xs);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--color-text);
+  font-size: var(--text-base);
+  line-height: 1;
+  cursor: pointer;
+  transition: var(--transition);
+
+  &:hover {
+    background: var(--color-hover-bg);
+    border-color: var(--color-border-hover);
+  }
+}
+
+.navbar__avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-bold);
+}
+
+.navbar__chev {
+  color: var(--color-text-muted);
+}
+
+.navbar__user-menu {
+  position: absolute;
+  top: calc(100% + var(--space-xs));
+  right: 0;
+  min-width: 180px;
+  padding: var(--space-xs);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  z-index: var(--z-dropdown);
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.navbar__menu-item {
+  display: block;
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  background: transparent;
+  border: none;
+  color: var(--color-text);
+  text-align: left;
+  font-size: var(--text-base);
+  line-height: 1.5;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: var(--transition-fast);
+
+  &:hover {
+    background: var(--color-hover-bg);
+  }
+}

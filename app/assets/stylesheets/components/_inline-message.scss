@@ -1,0 +1,13 @@
+.inline-message {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+
+  &[data-variant="success"] { color: var(--color-success); }
+  &[data-variant="warning"] { color: var(--color-warning); }
+  &[data-variant="danger"] { color: var(--color-danger); }
+  &[data-variant="info"] { color: var(--color-info); }
+}

@@ -1,0 +1,12 @@
+<div class="empty-state" role="status">
+  <div class="empty-state__icon">
+    <%= render Ui::IconComponent.new(name: icon, size: 32) %>
+  </div>
+  <h3 class="empty-state__title"><%= title %></h3>
+  <% if hint.present? %>
+    <p class="empty-state__hint"><%= hint %></p>
+  <% end %>
+  <% if action? %>
+    <%= action %>
+  <% end %>
+</div>

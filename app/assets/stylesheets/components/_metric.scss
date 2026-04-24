@@ -1,0 +1,31 @@
+.metric {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+
+  &__label {
+    font-size: var(--text-sm);
+    line-height: 1.45;
+    color: var(--color-text-secondary);
+  }
+
+  &__value {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-xs);
+  }
+
+  &__number {
+    font-size: var(--text-lg);
+    font-weight: var(--weight-semibold);
+    font-family: var(--font-mono);
+    line-height: 1.2;
+    color: var(--color-text);
+  }
+
+  &__unit {
+    font-size: var(--text-sm);
+    line-height: 1.45;
+    color: var(--color-text-muted);
+  }
+}

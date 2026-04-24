@@ -1,0 +1,49 @@
+name: ${COMPOSE_PROJECT_NAME:-aihackathon}
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: aihackathon
+      POSTGRES_PASSWORD: aihackathon
+      POSTGRES_DB: aihackathon_development
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aihackathon"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "${RAILS_PORT:-3130}:3000"
+      - "3036:3036"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DB_HOST: db
+      DB_USER: aihackathon
+      DB_PASSWORD: aihackathon
+      RAILS_ENV: development
+      VITE_RUBY_HOST: 0.0.0.0
+    volumes:
+      - .:/app
+      - bundle_cache:/usr/local/bundle
+      - node_modules:/app/node_modules
+    depends_on:
+      db:
+        condition: service_healthy
+    tty: true
+    stdin_open: true
+    init: true
+    shm_size: '512m'
+
+volumes:
+  pgdata:
+  bundle_cache:
+  node_modules:

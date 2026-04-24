@@ -1,0 +1,28 @@
+ja:
+  date:
+    formats:
+      default: "%Y/%m/%d"
+      short: "%m/%d"
+      long: "%Y年%m月%d日"
+  time:
+    formats:
+      default: "%Y/%m/%d %H:%M"
+      short: "%m/%d %H:%M"
+      long: "%Y年%m月%d日 %H時%M分"
+
+  enumerize:
+    item:
+      status:
+        draft: 下書き
+        published: 公開
+        archived: アーカイブ
+
+  activerecord:
+    models:
+      item: アイテム
+    attributes:
+      item:
+        title: タイトル
+        body: 本文
+        status: ステータス
+        image: 画像

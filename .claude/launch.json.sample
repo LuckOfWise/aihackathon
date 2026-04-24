@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "__NAME__",
+      "runtimeExecutable": "bin/dev-preview",
+      "runtimeArgs": [],
+      "port": __PORT__
+    }
+  ]
+}

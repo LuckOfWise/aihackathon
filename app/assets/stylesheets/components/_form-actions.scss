@@ -1,0 +1,9 @@
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+  padding-top: var(--space-md);
+
+  &[data-align="start"] { justify-content: flex-start; }
+  &[data-align="between"] { justify-content: space-between; }
+}

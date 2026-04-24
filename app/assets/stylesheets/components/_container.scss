@@ -1,0 +1,9 @@
+.container {
+  margin: 0 auto;
+  width: 100%;
+
+  &[data-width="focus"] { max-width: var(--container-focus); }
+  &[data-width="form"] { max-width: var(--container-form); }
+  &[data-width="reading"] { max-width: var(--reading-width-body); }
+  &[data-width="wide"] { max-width: var(--container-wide); }
+}

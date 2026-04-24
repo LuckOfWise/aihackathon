@@ -1,0 +1,14 @@
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+
+  &[data-gap="xs"] { gap: var(--space-xs); }
+  &[data-gap="sm"] { gap: var(--space-sm); }
+  &[data-gap="lg"] { gap: var(--space-lg); }
+  &[data-gap="xl"] { gap: var(--space-xl); }
+
+  &[data-align="center"] { align-items: center; }
+  &[data-align="end"] { align-items: flex-end; }
+  &[data-align="stretch"] { align-items: stretch; }
+}

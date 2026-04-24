@@ -1,0 +1,8 @@
+<span class="avatar__group">
+  <% visible.each do |u| %>
+    <%= render Ui::AvatarComponent.new(name: u, size: size) %>
+  <% end %>
+  <% if remaining.positive? %>
+    <span class="avatar" data-size="<%= size %>" style="background: var(--color-border-strong);">+<%= remaining %></span>
+  <% end %>
+</span>

@@ -1,0 +1,10 @@
+<table class="table">
+  <thead>
+    <tr><% headers.each do |h| %><th><%= h %></th><% end %></tr>
+  </thead>
+  <tbody>
+    <% rows.each do |row| %>
+      <tr><% row.each do |cell| %><td><%= cell %></td><% end %></tr>
+    <% end %>
+  </tbody>
+</table>

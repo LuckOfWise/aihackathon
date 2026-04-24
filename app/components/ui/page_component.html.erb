@@ -1,0 +1,23 @@
+<section class="page"<% if width_attr %> data-width="<%= width_attr %>"<% end %>>
+  <header class="page__header">
+    <div>
+      <div class="page__title-group">
+        <% if back_to? %>
+          <%= link_to back_to, class: 'page__back-icon', title: '戻る' do %>
+            <%= render Ui::IconComponent.new(name: 'arrow-left') %>
+          <% end %>
+        <% end %>
+        <h1 class="page__title"><%= title %></h1>
+      </div>
+      <% if lede? %>
+        <p class="page__lede"><%= lede %></p>
+      <% end %>
+    </div>
+
+    <% if actions? %>
+      <div class="page__actions"><%= actions %></div>
+    <% end %>
+  </header>
+
+  <%= content %>
+</section>

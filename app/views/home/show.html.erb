@@ -1,0 +1,17 @@
+<% content_for :title, 'Aihackathon' %>
+
+<%= render Ui::PageComponent.new(title: '準備完了', width: :focus) do |page| %>
+  <% page.with_lede do %>
+    AI ハッカソン用の Rails スケルトン。テーマ発表後、ドメインに合わせて
+    <code>Item</code> モデルとエージェントを差し替えれば即動く状態です。
+  <% end %>
+
+  <%= render Ui::CardComponent.new do |c| %>
+    <% c.with_title { 'スタートダッシュ・チェック' } %>
+    <ul style="margin: 0; padding-left: 1.2em; line-height: 1.9;">
+      <li><%= link_to 'Styleguide', styleguide_path %> でデザイン確認・テーマ切替</li>
+      <li>認証: <code>/users/sign_in</code>（Devise 導入後）</li>
+      <li>AI Agent: <code>app/agents/</code> にサンプルあり</li>
+    </ul>
+  <% end %>
+<% end %>

@@ -1,0 +1,402 @@
+<% content_for :title, 'Styleguide' %>
+
+<%= render Ui::PageComponent.new(title: 'Styleguide', width: :wide) do |page| %>
+  <% page.with_lede do %>
+    デザインシステム一覧（111コンポーネント）。テーマ切替で全UIが一括反映されるのを確認できる。
+    当日テーマが決まったら <code>_variables.scss</code> の色トークンだけ書き換えればOK。
+  <% end %>
+
+  <div class="styleguide">
+
+    <%# ========= Theme Switcher ========= %>
+    <section class="styleguide__group" data-controller="theme">
+      <h2 class="styleguide__group-title">Theme</h2>
+      <div class="styleguide__theme-switcher">
+        <% %w[default dusk warm].each do |theme| %>
+          <button type="button" class="styleguide__theme-button" data-theme="<%= theme %>" data-action="theme#set"><%= theme %></button>
+        <% end %>
+      </div>
+    </section>
+
+    <%# ========= Color Tokens ========= %>
+    <section class="styleguide__group">
+      <h2 class="styleguide__group-title">Color Tokens</h2>
+      <div class="styleguide__swatch-grid">
+        <% %w[--color-primary --color-primary-hover --color-accent --color-success --color-warning --color-danger --color-info --color-surface --color-surface-alt --color-bg --color-text --color-text-secondary --color-text-muted --color-border --color-border-hover --color-border-strong].each do |token| %>
+          <%= render Ui::ColorTokenComponent.new(token: token) %>
+        <% end %>
+      </div>
+    </section>
+
+    <%# ========= Display / Typography ========= %>
+    <section class="styleguide__group">
+      <h2 class="styleguide__group-title">Heading / Typography</h2>
+      <%= render Ui::StackComponent.new(gap: :sm) do %>
+        <%= render Ui::HeadingComponent.new(level: 1).with_content('H1 見出し') %>
+        <%= render Ui::HeadingComponent.new(level: 2).with_content('H2 見出し') %>
+        <%= render Ui::HeadingComponent.new(level: 3).with_content('H3 見出し') %>
+        <%= render Ui::SectionLabelComponent.new.with_content('Section Label') %>
+        <%= render Ui::CaptionComponent.new.with_content('Caption — 補足テキスト') %>
+      <% end %>
+    </section>
+
+    <%# ========= Hero ========= %>
+    <section class="styleguide__group">
+      <h2 class="styleguide__group-title">HeroText</h2>
+      <%= render Ui::HeroTextComponent.new(title: '書いた文書を、URLひとつで渡す。', mark: 'SIGN IN') do |h| %>
+        <% h.with_lede do %>HTMLとMarkdownを預けて、公開範囲ごとにリンクを発行する。<% end %>
+      <% end %>
+    </section>
+
+    <%# ========= Logo / Avatar ========= %>
+    <section class="styleguide__group">
+      <h2 class="styleguide__group-title">Logo / Avatar</h2>
+      <div class="styleguide__row">
+        <%= render Ui::LogoComponent.new(name: 'Aihackathon') %>
+        <%= render Ui::AvatarComponent.new(name: 'Alice', size: :sm) %>
+        <%= render Ui::AvatarComponent.new(name: 'Bob', size: :md) %>
+        <%= render Ui::AvatarComponent.new(name: 'Carol', size: :lg) %>
+        <%= render Ui::AvatarGroupComponent.new(users: %w[Alice Bob Carol David Eve Frank], size: :md, max: 4) %>
+      </div>
+    </section>
+
+    <%# ========= Badges / Chips / Tags / Dots ========= %>
+    <section class="styleguide__group">
+      <h2 class="styleguide__group-title">Badges / Chips / Tags / Dots</h2>
+      <div class="styleguide__row">
+        <%= render Ui::BadgeComponent.new.with_content('Default') %>
+        <%= render Ui::BadgeComponent.new(variant: :primary).with_content('Primary') %>
+        <%= render Ui::BadgeComponent.new(variant: :success, with_dot: true).with_content('公開中') %>
+        <%= render Ui::BadgeComponent.new(variant: :warning, with_dot: true).with_content('下書き') %>
+        <%= render Ui::BadgeComponent.new(variant: :danger, with_dot: true).with_content('アーカイブ') %>
+        <%= render Ui::PillComponent.new.with_content('42') %>
+        <%= render Ui::PillComponent.new(variant: :primary).with_content('+12') %>
+        <%= render Ui::ChipComponent.new(active: true).with_content('チップ選択') %>
+        <%= render Ui::ChipComponent.new.with_content('チップ未選択') %>
+        <%= render Ui::TagComponent.new.with_content('Hackathon') %>
+        <%= render Ui::TagComponent.new.with_content('AI') %>
+      </div>
+      <div class="styleguide__row">
+        <%= render Ui::DotComponent.new %>
+        <%= render Ui::DotComponent.new(variant: :success, pulse: true) %>
+        <%= render Ui::DotComponent.new(variant: :warning) %>
+        <%= render Ui::DotComponent.new(variant: :danger) %>
+        <%= render Ui::DotComponent.new(variant: :info) %>
+      </div>
+    </section>
+
+    <%# ========= Stat / Metric ========= %>
+    <section class="styleguide__group">
+      <h2 class="styleguide__group-title">Stat / Metric</h2>
+      <%= render Ui::GridComponent.new(cols: 3) do %>
+        <%= render Ui::StatComponent.new(label: 'Total Requests', value: '128,453', delta: '+12.4%', delta_direction: :up) %>
+        <%= render Ui::StatComponent.new(label: 'Active Users', value: '1,204', delta: '-3.2%', delta_direction: :down) %>
+        <%= render Ui::MetricComponent.new(label: 'Avg Response', value: '842', unit: 'ms') %>
+      <% end %>
+    </section>
+
+    <%# ========= Buttons / Actions ========= %>
+    <section class="styleguide__group">
+      <h2 class="styleguide__group-title">Buttons / Actions</h2>
+      <div class="styleguide__row">
+        <%= render Ui::ButtonComponent.new(variant: :primary).with_content('Primary') %>
+        <%= render Ui::ButtonComponent.new(variant: :outline).with_content('Outline') %>
+        <%= render Ui::ButtonComponent.new(variant: :ghost).with_content('Ghost') %>
+        <%= render Ui::ButtonComponent.new(variant: :danger).with_content('削除') %>
+        <%= render Ui::ButtonComponent.new(loading: true).with_content('送信中...') %>
+        <%= render Ui::RetryButtonComponent.new %>
+        <%= render Ui::CopyButtonComponent.new(text: 'sk-ant-api03-xxx') %>
+      </div>
+      <div class="styleguide__row">
+        <%= render Ui::ButtonGroupComponent.new do %>
+          <%= render Ui::ButtonComponent.new(variant: :outline).with_content('Day') %>
+          <%= render Ui::ButtonComponent.new(variant: :outline).with_content('Week') %>
+          <%= render Ui::ButtonComponent.new(variant: :outline).with_content('Month') %>
+        <% end %>
+        <%= render Ui::SplitButtonComponent.new(label: '保存') %>
+        <%= render Ui::ConfirmButtonComponent.new(message: '削除しますか？').with_content('削除する') %>
+        <%= render Ui::BackLinkComponent.new(href: '#') %>
+      </div>
+    </section>
+
+    <%# ========= Alerts / Callout / Toast ========= %>
+    <section class="styleguide__group">
+      <h2 class="styleguide__group-title">Feedback</h2>
+      <%= render Ui::StackComponent.new(gap: :sm) do %>
+        <%= render Ui::AlertComponent.new(variant: :notice).with_content('情報メッセージ') %>
+        <%= render Ui::AlertComponent.new(variant: :success).with_content('保存しました') %>
+        <%= render Ui::AlertComponent.new(variant: :warning).with_content('注意が必要です') %>
+        <%= render Ui::AlertComponent.new(variant: :alert).with_content('エラーが発生しました') %>
+        <%= render Ui::BannerComponent.new(variant: :info).with_content('メンテナンス予定: 2026/05/01 23:00 〜') %>
+        <%= render Ui::CalloutComponent.new(title: 'ヒント', variant: :info).with_content('API key は credentials 経由で設定してください。') %>
+        <%= render Ui::ToastComponent.new(variant: :success).with_content('コピーしました') %>
+        <%= render Ui::InlineMessageComponent.new(variant: :success).with_content('送信完了') %>
+      <% end %>
+    </section>
+
+    <%# ========= Loading / Progress ========= %>
+    <section class="styleguide__group">
+      <h2 class="styleguide__group-title">Loading / Progress</h2>
+      <div class="styleguide__row">
+        <%= render Ui::SpinnerComponent.new(size: :sm) %>
+        <%= render Ui::SpinnerComponent.new(size: :md) %>
+        <%= render Ui::SpinnerComponent.new(size: :lg) %>
+        <%= render Ui::LoadingDotsComponent.new %>
+        <%= render Ui::CircularProgressComponent.new(value: 65) %>
+      </div>
+      <%= render Ui::ProgressComponent.new(value: 45) %>
+      <%= render Ui::ProgressComponent.new %>
+      <%= render Ui::GridComponent.new(cols: 3) do %>
+        <%= render Ui::SkeletonComponent.new(shape: :title) %>
+        <%= render Ui::SkeletonComponent.new(shape: :line) %>
+        <%= render Ui::SkeletonComponent.new(shape: :line) %>
+      <% end %>
+    </section>
+
+    <%# ========= Form Inputs ========= %>
+    <section class="styleguide__group">
+      <h2 class="styleguide__group-title">Form Inputs</h2>
+      <div style="max-width: var(--container-form);">
+        <%= render Ui::StackComponent.new do %>
+          <%= render Ui::FieldComponent.new(label: 'タイトル', name: 'title', required: true, placeholder: '例: ドキュメント共有ツール') %>
+          <%= render Ui::FieldComponent.new(label: '説明', name: 'description', type: :textarea, rows: 3) %>
+
+          <%= render Ui::LabelComponent.new(required: true).with_content('プラン') %>
+          <%= render Ui::ChipRadioGroupComponent.new(name: 'plan', options: [['Free', 'free'], ['Pro', 'pro'], ['Team', 'team']], selected: 'pro') %>
+
+          <%= render Ui::LabelComponent.new.with_content('カラー') %>
+          <div class="styleguide__row">
+            <%= render Ui::ColorSwatchComponent.new(color: '#2563eb', active: true, label: 'Blue') %>
+            <%= render Ui::ColorSwatchComponent.new(color: '#16a34a', label: 'Green') %>
+            <%= render Ui::ColorSwatchComponent.new(color: '#dc2626', label: 'Red') %>
+            <%= render Ui::ColorSwatchComponent.new(color: '#d97706', label: 'Orange') %>
+          </div>
+
+          <%= render Ui::LabelComponent.new.with_content('設定') %>
+          <%= render Ui::InlineComponent.new(gap: :lg) do %>
+            <%= render Ui::CheckboxInputComponent.new(name: 'a', label: 'メール通知', checked: true) %>
+            <%= render Ui::CheckboxInputComponent.new(name: 'b', label: 'Slack通知') %>
+            <%= render Ui::SwitchComponent.new(name: 'darkmode', label: 'ダークモード', checked: true) %>
+          <% end %>
+
+          <%= render Ui::LabelComponent.new.with_content('優先度') %>
+          <%= render Ui::InlineComponent.new(gap: :lg) do %>
+            <%= render Ui::RadioInputComponent.new(name: 'p', value: :low, label: '低') %>
+            <%= render Ui::RadioInputComponent.new(name: 'p', value: :mid, label: '中', checked: true) %>
+            <%= render Ui::RadioInputComponent.new(name: 'p', value: :high, label: '高') %>
+          <% end %>
+
+          <%= render Ui::SearchFieldComponent.new(placeholder: 'コマンド検索', kbd: '⌘K') %>
+
+          <%= render Ui::LabelComponent.new.with_content('タグ') %>
+          <%= render Ui::TagInputComponent.new(name: 'tags', tags: %w[hackathon ai demo]) %>
+
+          <%= render Ui::SliderComponent.new(name: 'volume', value: 40, marks: %w[0 50 100]) %>
+
+          <%= render Ui::SelectInputComponent.new(name: 'country', options: [['日本', 'jp'], ['米国', 'us'], ['英国', 'uk']], selected: 'jp') %>
+
+          <%= render Ui::LabelComponent.new.with_content('評価') %>
+          <%= render Ui::RatingComponent.new(value: 4) %>
+
+          <%= render Ui::FileUploadComponent.new(name: 'file', accept: 'image/*', label: '画像をドロップまたはクリック', hint: 'PNG / JPEG / WebP 最大10MB') %>
+
+          <%= render Ui::FormActionsComponent.new do %>
+            <%= render Ui::ButtonComponent.new(variant: :ghost).with_content('キャンセル') %>
+            <%= render Ui::ButtonComponent.new.with_content('保存') %>
+          <% end %>
+        <% end %>
+      </div>
+    </section>
+
+    <%# ========= Navigation ========= %>
+    <section class="styleguide__group">
+      <h2 class="styleguide__group-title">Navigation</h2>
+      <%= render Ui::StackComponent.new do %>
+        <%= render Ui::BreadcrumbComponent.new(items: [{ label: 'Home', href: '/' }, { label: 'Items', href: '/items' }, { label: 'Detail' }]) %>
+        <%= render Ui::TabsComponent.new(items: [{ label: '概要', id: 'o' }, { label: '設定', id: 's' }, { label: 'ログ', id: 'l' }], active: 'o') %>
+        <%= render Ui::SegmentControlComponent.new(items: [['Day', :day], ['Week', :week], ['Month', :month]], active: :week) %>
+        <%= render Ui::StepperComponent.new(steps: %w[情報入力 プレビュー 公開 完了], current: 2) %>
+        <%= render Ui::PaginationComponent.new(total_pages: 7, current_page: 3) %>
+      <% end %>
+    </section>
+
+    <%# ========= AI Specific ========= %>
+    <section class="styleguide__group">
+      <h2 class="styleguide__group-title">AI-Specific</h2>
+      <div class="styleguide__row">
+        <%= render Ui::AIBadgeComponent.new %>
+        <%= render Ui::ModelBadgeComponent.new(model: 'claude-sonnet-4-5') %>
+        <%= render Ui::SafetyBadgeComponent.new(level: :safe) %>
+        <%= render Ui::SafetyBadgeComponent.new(level: :caution) %>
+        <%= render Ui::SafetyBadgeComponent.new(level: :blocked) %>
+      </div>
+
+      <%= render Ui::ChatThreadComponent.new do %>
+        <%= render Ui::ChatBubbleComponent.new(role: :user, avatar: 'U').with_content('Railsで一言教えて') %>
+        <%= render Ui::ChatBubbleComponent.new(role: :assistant, meta: 'claude-sonnet-4-5 · 142 tokens') do %>
+          Ruby on RailsはWebアプリを素早く構築できるフレームワークです。<br>「設定より規約」の思想で、面倒な設定なしで動きます。
+        <% end %>
+      <% end %>
+
+      <%= render Ui::StreamingTextComponent.new.with_content('回答を生成中...よく考えて書いています。') %>
+
+      <%= render Ui::GridComponent.new(cols: 2) do %>
+        <%= render Ui::TokenMeterComponent.new(used: 1024, limit: 4096) %>
+        <%= render Ui::TemperatureSliderComponent.new(value: 0.7) %>
+      <% end %>
+
+      <%= render Ui::GridComponent.new(cols: 2) do %>
+        <%= render Ui::PromptCardComponent.new(title: '要約', body: 'この記事を3行で要約して。', meta: '42 tokens') %>
+        <%= render Ui::PromptCardComponent.new(title: '翻訳', body: '次の文を日本語に訳して: {{text}}', meta: '20 tokens') %>
+      <% end %>
+
+      <%= render Ui::ReasoningComponent.new do %>
+        ステップ1: 入力を解析してキーワードを抽出
+        ステップ2: 関連する文脈を想起
+        ステップ3: 3行以内にまとめる
+      <% end %>
+
+      <p>プロンプト変数の表示: Hello <%= render Ui::PromptVariableComponent.new.with_content('user_name') %>!</p>
+    </section>
+
+    <%# ========= Cards / Panels / Box ========= %>
+    <section class="styleguide__group">
+      <h2 class="styleguide__group-title">Card / Panel / Box</h2>
+      <%= render Ui::GridComponent.new(cols: 2) do %>
+        <%= render Ui::CardComponent.new do |c| %>
+          <% c.with_title { 'プロンプトの結果' } %>
+          <% c.with_meta { 'GENERATED · 2026-04-24' } %>
+          Card コンポーネント。任意のコンテンツを内包できる。
+          <% c.with_footer do %>
+            <%= render Ui::ButtonComponent.new(variant: :ghost).with_content('キャンセル') %>
+            <%= render Ui::ButtonComponent.new.with_content('保存') %>
+          <% end %>
+        <% end %>
+
+        <%= render Ui::PanelComponent.new do |p| %>
+          <% p.with_header { 'Panel ヘッダー' } %>
+          Panel コンポーネント。ヘッダー/ボディ/フッターの3部構造。
+          <% p.with_footer { 'Panel フッター' } %>
+        <% end %>
+      <% end %>
+
+      <%= render Ui::BoxComponent.new(bg: :muted, bordered: true) do %>
+        <code>Ui::BoxComponent</code> — padding / bg / bordered を data-attr で制御する汎用箱。
+      <% end %>
+    </section>
+
+    <%# ========= CTA / Empty ========= %>
+    <section class="styleguide__group">
+      <h2 class="styleguide__group-title">CTA / Empty State</h2>
+      <%= render Ui::CtaBannerComponent.new(title: '無料プランで今すぐ始める', lede: 'クレジットカード不要。1分で開始。') do |c| %>
+        <% c.with_action do %>
+          <%= render Ui::ButtonComponent.new.with_content('サインアップ') %>
+        <% end %>
+      <% end %>
+
+      <%= render Ui::EmptyStateComponent.new(title: 'まだアイテムはありません', hint: '最初のアイテムを作成してください') do |c| %>
+        <% c.with_action do %>
+          <%= render Ui::ButtonComponent.new.with_content('作成する') %>
+        <% end %>
+      <% end %>
+    </section>
+
+    <%# ========= Data Display ========= %>
+    <section class="styleguide__group">
+      <h2 class="styleguide__group-title">Data Display</h2>
+      <%= render Ui::TableComponent.new(headers: %w[Name Role Status], rows: [
+        ['Alice', 'Admin', '✓ Active'],
+        ['Bob', 'Member', '✓ Active'],
+        ['Carol', 'Guest', '— Invited'],
+      ]) %>
+
+      <%= render Ui::AccordionComponent.new do %>
+        <%= render Ui::AccordionItemComponent.new(summary: 'Q. データはどこに保存されますか？', open: true) do %>
+          開発時はローカル PostgreSQL に保存され、コンテナ終了時に破棄されます。
+        <% end %>
+        <%= render Ui::AccordionItemComponent.new(summary: 'Q. API Key の管理は？') do %>
+          credentials.yml.enc 経由で管理し、コミット対象に含めません。
+        <% end %>
+      <% end %>
+
+      <%= render Ui::DefinitionListComponent.new(items: {
+        '形式' => 'HTML / Markdown',
+        '公開範囲' => '限定共有 / ドメイン内 / 全員',
+        '認証' => 'Google OAuth 2.0',
+      }) %>
+
+      <%= render Ui::JsonViewComponent.new(data: { title: '要約', sentiment: 'positive', tags: %w[ai claude hackathon], tokens: 128 }) %>
+
+      <%= render Ui::TreeNodeComponent.new(nodes: [
+        { label: 'app/', children: [
+          { label: 'agents/', children: [{ label: 'chat_agent.rb' }, { label: 'vision_agent.rb' }] },
+          { label: 'components/ui/', children: [{ label: '111 files...' }] },
+        ] },
+      ]) %>
+
+      <%= render Ui::GridComponent.new(cols: 3) do %>
+        <%= render Ui::KanbanCardComponent.new(title: 'テーマ発表', meta: '10:00') %>
+        <%= render Ui::KanbanCardComponent.new(title: 'アイデア出し', meta: '15min') %>
+        <%= render Ui::KanbanCardComponent.new(title: '実装', meta: '2h') %>
+      <% end %>
+    </section>
+
+    <%# ========= Text / Mono ========= %>
+    <section class="styleguide__group">
+      <h2 class="styleguide__group-title">Text / Mono</h2>
+      <%= render Ui::StackComponent.new(gap: :sm) do %>
+        <%= render Ui::QuoteComponent.new(attribution: 'Robin Williams') do %>
+          Non-Designer's Design Book — 4 原則を守るだけでデザインは良くなる。
+        <% end %>
+        <%= render Ui::CodeBlockComponent.new(language: 'ruby') do %>
+class ChatAgent &lt; ApplicationAgent
+  def reply
+    prompt(message: params[:message])
+  end
+end
+        <% end %>
+        <%= render Ui::CodeDiffComponent.new(lines: [
+          { kind: :context, text: 'def save' },
+          { kind: :remove, text: '  save_as_draft' },
+          { kind: :add, text: '  publish_immediately' },
+          { kind: :context, text: 'end' },
+        ]) %>
+        <%= render Ui::MarkdownViewComponent.new(text: "# 見出し\n\n本文サンプル。**強調**と`code`を含む。") %>
+      <% end %>
+    </section>
+
+    <%# ========= Utility ========= %>
+    <section class="styleguide__group">
+      <h2 class="styleguide__group-title">Utility</h2>
+      <div class="styleguide__row">
+        <%= render Ui::KbdComponent.new.with_content('⌘') %>
+        <%= render Ui::KbdComponent.new.with_content('K') %>
+        <%= render Ui::KeyboardShortcutComponent.new(keys: %w[⌘ ⇧ P]) %>
+        <%= render Ui::TimestampComponent.new(time: Time.current, format: :short) %>
+      </div>
+      <%= render Ui::DividerComponent.new %>
+      <%= render Ui::DividerComponent.new(label: 'or') %>
+      <%= render Ui::LegendComponent.new(items: [
+        { label: '進行中', variant: :primary },
+        { label: '完了', variant: :success },
+        { label: 'エラー', variant: :danger },
+      ]) %>
+      <%= render Ui::DiagonalStripesComponent.new %>
+    </section>
+
+    <%# ========= Container Widths ========= %>
+    <section class="styleguide__group">
+      <h2 class="styleguide__group-title">Container Widths</h2>
+      <%= render Ui::StackComponent.new(gap: :sm) do %>
+        <% %i[focus form reading wide].each do |w| %>
+          <div style="background: var(--color-primary-ring); border: 1px dashed var(--color-primary); padding: var(--space-sm); border-radius: var(--radius);">
+            <%= render Ui::ContainerComponent.new(width: w) do %>
+              <code>data-width="<%= w %>"</code> — <%= { focus: '460px', form: '680px', reading: '42em', wide: '1200px' }[w] %>
+            <% end %>
+          </div>
+        <% end %>
+      <% end %>
+    </section>
+
+  </div>
+<% end %>

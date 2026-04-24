@@ -1,0 +1,36 @@
+.circular-progress {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 44px;
+  height: 44px;
+
+  svg {
+    transform: rotate(-90deg);
+    width: 100%;
+    height: 100%;
+  }
+
+  &__track {
+    fill: none;
+    stroke: var(--color-hover-bg);
+    stroke-width: 4;
+  }
+
+  &__fill {
+    fill: none;
+    stroke: var(--color-primary);
+    stroke-width: 4;
+    stroke-linecap: round;
+    transition: stroke-dashoffset var(--transition);
+  }
+
+  &__label {
+    position: absolute;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    line-height: 1;
+    color: var(--color-text-secondary);
+  }
+}

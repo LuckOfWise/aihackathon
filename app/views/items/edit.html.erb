@@ -1,0 +1,7 @@
+<% content_for :title, '編集' %>
+
+<%= render Ui::PageComponent.new(title: '編集', width: :form) do |page| %>
+  <% page.with_back_to(item_path(@item)) %>
+
+  <%= render 'form', item: @item %>
+<% end %>

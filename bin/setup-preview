@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+RAILS_PORT=$(bin/find-port 3130)
+
+PROJECT_DIR=$(basename "$(pwd)")
+BRANCH=$(git branch --show-current 2>/dev/null | sed 's/[^a-zA-Z0-9_-]/-/g')
+PREVIEW_NAME="${PROJECT_DIR}-${BRANCH:-dev}"
+
+if [ -f .claude/launch.json.sample ]; then
+  sed -e "s/__PORT__/${RAILS_PORT}/" -e "s/__NAME__/${PREVIEW_NAME}/" .claude/launch.json.sample > .claude/launch.json
+  echo "Generated .claude/launch.json (name: ${PREVIEW_NAME}, port: ${RAILS_PORT})"
+else
+  echo "Error: .claude/launch.json.sample not found" >&2
+  exit 1
+fi

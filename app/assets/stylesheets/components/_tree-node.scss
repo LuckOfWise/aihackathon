@@ -1,0 +1,39 @@
+.tree-node {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  list-style: none;
+  padding-left: 0;
+
+  &__item {
+    position: relative;
+    padding: 2px 0 2px var(--space-md);
+    color: var(--color-text);
+    line-height: 1.6;
+
+    &::before {
+      content: "";
+      position: absolute;
+      left: 4px;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: var(--color-border);
+    }
+  }
+
+  &__label {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+
+    &::before {
+      content: "";
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--color-text-muted);
+      margin-right: var(--space-xs);
+    }
+  }
+}

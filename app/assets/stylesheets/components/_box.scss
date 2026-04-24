@@ -1,0 +1,18 @@
+.box {
+  padding: var(--space-md);
+  background: var(--color-surface);
+  border-radius: var(--radius);
+
+  &[data-padding="sm"] { padding: var(--space-sm); }
+  &[data-padding="lg"] { padding: var(--space-lg); }
+  &[data-padding="none"] { padding: 0; }
+
+  &[data-bg="muted"] { background: var(--color-surface-alt); }
+  &[data-bg="subtle"] { background: var(--color-hover-bg); }
+  &[data-bg="primary"] { background: var(--color-primary-ring); }
+  &[data-bg="none"] { background: transparent; }
+
+  &[data-bordered="true"] {
+    border: 1px solid var(--color-border);
+  }
+}

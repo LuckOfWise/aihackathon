@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+# OrbStack等のdockerコマンドをPATHに追加
+export PATH="/Applications/OrbStack.app/Contents/MacOS/xbin:$PATH"
+
+# Docker Composeプロジェクト名をディレクトリ名から生成（ワークツリー間の分離に必須）
+PROJECT_DIR=$(basename "$(pwd)")
+export COMPOSE_PROJECT_NAME="aihackathon_${PROJECT_DIR}"
+
+# launch.json が無い、またはブランチが変わっていれば再生成
+BRANCH=$(git branch --show-current 2>/dev/null | sed 's/[^a-zA-Z0-9_-]/-/g')
+EXPECTED_NAME="${PROJECT_DIR}-${BRANCH:-dev}"
+
+if [ ! -f .claude/launch.json ] || ! grep -q "\"name\": \"${EXPECTED_NAME}\"" .claude/launch.json; then
+  bin/setup-preview
+fi
+
+# launch.json からポートを読み取って使う
+RAILS_PORT=$(grep -o '"port": [0-9]*' .claude/launch.json | grep -o '[0-9]*')
+
+export RAILS_PORT
+
+echo "=== Preview Environment ==="
+echo "Project:  ${COMPOSE_PROJECT_NAME}"
+echo "Name:     ${EXPECTED_NAME}"
+echo "Rails:    http://localhost:${RAILS_PORT}"
+echo "==========================="
+
+cleanup() {
+  echo "Stopping containers..."
+  docker compose -f docker-compose.dev.yml down
+}
+trap cleanup EXIT
+
+docker compose -f docker-compose.dev.yml up --build

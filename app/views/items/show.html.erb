@@ -1,0 +1,45 @@
+<% content_for :title, @item.title %>
+
+<%= render Ui::PageComponent.new(title: @item.title.presence || '(無題)', width: :reading) do |page| %>
+  <% page.with_back_to(items_path) %>
+  <% page.with_actions do %>
+    <%= link_to '編集', edit_item_path(@item), class: 'button', data: { variant: 'outline' } %>
+  <% end %>
+
+  <div class="items__show">
+    <dl class="spec-list">
+      <div class="spec-list__row">
+        <dt>ステータス</dt>
+        <dd>
+          <%= render Ui::BadgeComponent.new(variant: status_variant(@item.status), with_dot: true) { @item.status.text } %>
+        </dd>
+      </div>
+      <div class="spec-list__row">
+        <dt>作成</dt>
+        <dd><%= l(@item.created_at, format: :long) %></dd>
+      </div>
+      <div class="spec-list__row">
+        <dt>更新</dt>
+        <dd><%= l(@item.updated_at, format: :long) %></dd>
+      </div>
+    </dl>
+
+    <% if @item.image.attached? %>
+      <div class="page__section">
+        <p class="page__section-label">Image</p>
+        <%= image_tag @item.image, class: 'items__preview-image' %>
+      </div>
+    <% end %>
+
+    <% if @item.body.present? %>
+      <div class="page__section">
+        <p class="page__section-label">Body</p>
+        <div class="items__body"><%= @item.body %></div>
+      </div>
+    <% end %>
+
+    <div class="page__danger-zone">
+      <%= button_to '削除', item_path(@item), method: :delete, class: 'button', data: { variant: 'danger', turbo_confirm: 'このアイテムを削除しますか？' } %>
+    </div>
+  </div>
+<% end %>

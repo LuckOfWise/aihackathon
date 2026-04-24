@@ -1,0 +1,16 @@
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius);
+  color: var(--color-text-muted);
+  transition: var(--transition);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--color-text);
+    background: var(--color-hover-bg);
+  }
+}

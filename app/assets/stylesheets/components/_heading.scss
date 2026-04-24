@@ -1,0 +1,21 @@
+.heading {
+  margin: 0;
+  color: var(--color-text);
+
+  &[data-level="1"] {
+    font-size: var(--text-xl);
+    font-weight: var(--weight-bold);
+    line-height: 1.35;
+    letter-spacing: var(--tracking-tight);
+  }
+  &[data-level="2"] {
+    font-size: var(--text-lg);
+    font-weight: var(--weight-bold);
+    line-height: 1.4;
+  }
+  &[data-level="3"] {
+    font-size: var(--text-md);
+    font-weight: var(--weight-semibold);
+    line-height: 1.45;
+  }
+}

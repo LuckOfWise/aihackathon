@@ -1,0 +1,35 @@
+.token-meter {
+  display: inline-flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  line-height: 1.4;
+  color: var(--color-text-muted);
+  min-width: 180px;
+
+  &__top {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  &__count {
+    color: var(--color-text);
+  }
+
+  &__bar {
+    height: 4px;
+    background: var(--color-hover-bg);
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+  }
+
+  &__fill {
+    height: 100%;
+    background: var(--color-primary);
+    transition: width var(--transition);
+
+    &[data-level="warning"] { background: var(--color-warning); }
+    &[data-level="danger"] { background: var(--color-danger); }
+  }
+}

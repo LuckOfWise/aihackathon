@@ -1,0 +1,23 @@
+.loading-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: transparent;
+  z-index: var(--z-toast);
+  overflow: hidden;
+
+  &__fill {
+    display: block;
+    width: 30%;
+    height: 100%;
+    background: var(--color-primary);
+    animation: loading-bar-slide 1.5s ease-in-out infinite;
+  }
+}
+
+@keyframes loading-bar-slide {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(400%); }
+}

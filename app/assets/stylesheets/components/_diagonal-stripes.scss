@@ -1,0 +1,12 @@
+.diagonal-stripes {
+  background-image: repeating-linear-gradient(
+    45deg,
+    var(--color-border),
+    var(--color-border) 6px,
+    transparent 6px,
+    transparent 12px
+  );
+  background-color: var(--color-surface-alt);
+  border-radius: var(--radius);
+  min-height: 48px;
+}
