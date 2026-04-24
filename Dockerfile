@@ -39,14 +39,18 @@ RUN apt-get update -qq && \
 ARG NODE_VERSION=25.9.0
 ARG YARN_VERSION=1.22.22
 ENV PATH=/usr/local/node/bin:$PATH
-RUN ARCH=$(uname -m) && \
+RUN set -eux; \
+    ARCH=$(uname -m); \
     if [ "$ARCH" = "x86_64" ]; then NODE_ARCH="x64"; \
     elif [ "$ARCH" = "aarch64" ]; then NODE_ARCH="arm64"; \
-    else echo "Unsupported arch: $ARCH" && exit 1; fi && \
-    curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${NODE_ARCH}.tar.xz" | tar -xJ -C /usr/local/ && \
-    mv "/usr/local/node-v${NODE_VERSION}-linux-${NODE_ARCH}" /usr/local/node && \
-    corepack enable && \
-    corepack prepare "yarn@${YARN_VERSION}" --activate
+    else echo "Unsupported arch: $ARCH" && exit 1; fi; \
+    curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${NODE_ARCH}.tar.xz" -o /tmp/node.tar.xz; \
+    tar -xJf /tmp/node.tar.xz -C /usr/local/; \
+    rm /tmp/node.tar.xz; \
+    mv "/usr/local/node-v${NODE_VERSION}-linux-${NODE_ARCH}" /usr/local/node; \
+    /usr/local/node/bin/node --version; \
+    /usr/local/node/bin/npm install -g "yarn@${YARN_VERSION}"; \
+    yarn --version
 
 # Install application gems
 COPY vendor/* ./vendor/
