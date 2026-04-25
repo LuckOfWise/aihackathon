@@ -3,7 +3,7 @@ Rails.application.routes.draw do
 
   get 'styleguide' => 'styleguide#show', as: :styleguide
 
-  resources :items
+  resources :items, only: %i[index show new edit create update destroy]
 
   namespace :playground do
     resource :stream, only: %i[show create], controller: 'streams'

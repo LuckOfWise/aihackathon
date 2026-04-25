@@ -18,7 +18,7 @@ class Ui::TextInputComponent < ApplicationComponent
       placeholder: @placeholder,
       required: @required,
       disabled: @disabled,
-      data: { size: @size },
+      data: { size: @size }
     )
   end
 end

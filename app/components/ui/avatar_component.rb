@@ -10,7 +10,7 @@ class Ui::AvatarComponent < ApplicationComponent
       if @image_url.present?
         image_tag(@image_url, alt: @name.to_s)
       else
-        (@name.to_s[0] || '?').upcase
+        @name.to_s.fetch(0, '?').upcase
       end
     end
   end

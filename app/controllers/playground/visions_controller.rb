@@ -12,19 +12,19 @@ class Playground::VisionsController < Playground::BaseController
 
     if data_url.blank?
       flash.now[:alert] = '画像を選択してください'
-      return render :show, status: :unprocessable_entity
+      return render :show, status: :unprocessable_content
     end
 
     @preview = data_url
     @response = VisionAgent
-      .with(image: data_url, instruction: @instruction)
-      .describe
-      .generate_now
-      .message
-      .content
+                .with(image: data_url, instruction: @instruction)
+                .describe
+                .generate_now
+                .message
+                .content
     render :show
   rescue StandardError => e
     flash.now[:alert] = "生成に失敗しました: #{e.message}"
-    render :show, status: :unprocessable_entity
+    render :show, status: :unprocessable_content
   end
 end

@@ -12,23 +12,23 @@ class ItemsController < ApplicationController
     @item = Item.new
   end
 
+  def edit
+  end
+
   def create
     @item = Item.new(item_params)
     if @item.save
       redirect_to @item, notice: '作成しました'
     else
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
-  end
-
-  def edit
   end
 
   def update
     if @item.update(item_params)
       redirect_to @item, notice: '更新しました'
     else
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
   end
 

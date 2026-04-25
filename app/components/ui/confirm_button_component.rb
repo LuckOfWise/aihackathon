@@ -8,6 +8,6 @@ class Ui::ConfirmButtonComponent < ApplicationComponent
 
   def call
     button_to content, @href, method: @method, class: 'button',
-              data: { variant: @variant, turbo_confirm: @message }
+                              data: { variant: @variant, turbo_confirm: @message }
   end
 end

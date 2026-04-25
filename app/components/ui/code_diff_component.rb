@@ -6,7 +6,7 @@ class Ui::CodeDiffComponent < ApplicationComponent
   def call
     content_tag(:pre, class: 'code-diff') do
       safe_join(@lines.map do |line|
-        content_tag(:span, (line[:prefix] || sign(line[:kind])) + line[:text],
+        content_tag(:span, line.fetch(:prefix, sign(line[:kind])) + line[:text],
                     class: 'code-diff__line', data: { kind: line[:kind] })
       end)
     end
@@ -15,6 +15,6 @@ class Ui::CodeDiffComponent < ApplicationComponent
   private
 
   def sign(kind)
-    { add: '+ ', remove: '- ', context: '  ' }[kind.to_sym] || '  '
+    { add: '+ ', remove: '- ', context: '  ' }.fetch(kind.to_sym, '  ')
   end
 end

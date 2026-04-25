@@ -27,18 +27,18 @@ class Ui::PaginationComponent < ApplicationComponent
     when :prev
       disabled = @current_page <= 1
       content_tag(:a, href: (disabled ? '#' : @path_for.call(@current_page - 1)),
-                  class: 'pagination__item', 'aria-disabled': disabled) do
+                      class: 'pagination__item', 'aria-disabled': disabled) do
         render(Ui::IconComponent.new(name: 'chevron-left', size: 14))
       end
     when :next
       disabled = @current_page >= @total_pages
       content_tag(:a, href: (disabled ? '#' : @path_for.call(@current_page + 1)),
-                  class: 'pagination__item', 'aria-disabled': disabled) do
+                      class: 'pagination__item', 'aria-disabled': disabled) do
         render(Ui::IconComponent.new(name: 'chevron-right', size: 14))
       end
     else
       content_tag(:a, page, href: @path_for.call(page),
-                  class: ['pagination__item', ('is-active' if page == @current_page)].compact.join(' '))
+                            class: ['pagination__item', ('is-active' if page == @current_page)].compact.join(' '))
     end
   end
 end

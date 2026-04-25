@@ -10,21 +10,21 @@ class Playground::ExtractsController < Playground::BaseController
 
     if @text.blank?
       flash.now[:alert] = 'テキストを入力してください'
-      return render :show, status: :unprocessable_entity
+      return render :show, status: :unprocessable_content
     end
 
     @response = ExtractAgent
-      .with(text: @text)
-      .summarize
-      .generate_now
-      .message
-      .content
+                .with(text: @text)
+                .summarize
+                .generate_now
+                .message
+                .content
 
     @parsed = parse_json(@response)
     render :show
   rescue StandardError => e
     flash.now[:alert] = "生成に失敗しました: #{e.message}"
-    render :show, status: :unprocessable_entity
+    render :show, status: :unprocessable_content
   end
 
   private

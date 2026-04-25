@@ -1,5 +1,5 @@
 class Ui::CheckboxInputComponent < ApplicationComponent
-  def initialize(name:, value: '1', label:, checked: false, disabled: false)
+  def initialize(name:, label:, value: '1', checked: false, disabled: false)
     @name = name
     @value = value
     @label = label

@@ -10,6 +10,6 @@ class Playground::StreamsController < Playground::BaseController
     render :show
   rescue StandardError => e
     flash.now[:alert] = "生成に失敗しました: #{e.message}"
-    render :show, status: :unprocessable_entity
+    render :show, status: :unprocessable_content
   end
 end
