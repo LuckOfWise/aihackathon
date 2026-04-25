@@ -154,11 +154,13 @@
 }
 
 .shine-upload__camera-link {
+  appearance: none;
   align-self: center;
   display: inline-flex;
   align-items: center;
   gap: 8px;
   padding: 10px 16px;
+  background: transparent;
   border: 0.5px solid var(--shine-line-2);
   border-radius: 999px;
   color: var(--shine-bone-dim);
