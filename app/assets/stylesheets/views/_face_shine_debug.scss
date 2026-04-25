@@ -87,3 +87,14 @@
   background: var(--color-surface);
   color: var(--color-text);
 }
+
+.face-shine-debug__status {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-lg);
+
+  &[data-variant="error"] {
+    color: var(--color-danger);
+  }
+}

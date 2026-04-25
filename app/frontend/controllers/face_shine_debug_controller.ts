@@ -1,78 +1,126 @@
 import { Controller } from '@hotwired/stimulus'
-import type { LandmarksResponse, Point } from '../types/face'
+import { resizeToBase64 } from '../lib/image_resize'
+import { detectFaceFromDataUrl } from '../lib/face_landmarker'
+import type { FaceData, Point } from '../types/face'
 
 export default class extends Controller {
-  static targets = ['canvas', 'source']
-  static values = { landmarks: Object }
+  static targets = ['fileInput', 'canvas', 'status', 'result', 'json']
 
+  declare fileInputTarget: HTMLInputElement
   declare canvasTarget: HTMLCanvasElement
-  declare sourceTarget: HTMLImageElement
-  declare landmarksValue: LandmarksResponse
+  declare statusTarget: HTMLElement
+  declare resultTarget: HTMLElement
+  declare jsonTarget: HTMLElement
 
-  connect(): void {
-    if (this.sourceTarget.complete) {
-      this.draw()
-    } else {
-      this.sourceTarget.addEventListener('load', () => this.draw(), { once: true })
+  async onFileChange(event: Event): Promise<void> {
+    const input = event.currentTarget as HTMLInputElement
+    const file = input.files?.[0]
+    if (!file) return
+
+    this.setStatus('検出中… (初回はモデルをダウンロードするため数秒かかります)')
+    this.resultTarget.setAttribute('hidden', '')
+
+    try {
+      const dataUrl = await resizeToBase64(file)
+      const detection = await detectFaceFromDataUrl(dataUrl)
+      const img = await this.loadImage(dataUrl)
+
+      this.drawOverlay(img, detection.face)
+      this.jsonTarget.textContent = JSON.stringify(
+        { imageSize: detection.imageSize, face: detection.face },
+        null,
+        2,
+      )
+      this.resultTarget.removeAttribute('hidden')
+
+      if (detection.face) {
+        this.setStatus(
+          `検出成功 · 眼状態: L=${detection.face.eyes.left.state} / R=${detection.face.eyes.right.state} · 口: ${detection.face.mouth.state}`,
+        )
+      } else {
+        this.setStatus('顔は検出されませんでした。', 'error')
+      }
+    } catch (err) {
+      this.setStatus(err instanceof Error ? `エラー: ${err.message}` : 'エラーが発生しました', 'error')
     }
   }
 
-  disconnect(): void {
-    // no cleanup needed
+  private setStatus(text: string, variant: 'info' | 'error' = 'info'): void {
+    this.statusTarget.textContent = text
+    this.statusTarget.dataset.variant = variant
   }
 
-  private draw(): void {
-    const img = this.sourceTarget
+  private loadImage(src: string): Promise<HTMLImageElement> {
+    return new Promise((resolve, reject) => {
+      const img = new Image()
+      img.onload = () => resolve(img)
+      img.onerror = () => reject(new Error('画像の読み込みに失敗しました'))
+      img.src = src
+    })
+  }
+
+  private drawOverlay(img: HTMLImageElement, face: FaceData | null): void {
     const canvas = this.canvasTarget
-    canvas.width = img.naturalWidth
-    canvas.height = img.naturalHeight
+    const w = img.naturalWidth
+    const h = img.naturalHeight
+    canvas.width = w
+    canvas.height = h
 
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
     ctx.drawImage(img, 0, 0)
 
-    const { face } = this.landmarksValue
     if (!face) {
-      ctx.fillStyle = 'rgba(220, 38, 38, 0.8)'
-      ctx.font = '20px sans-serif'
-      ctx.fillText('顔が検出されませんでした', 20, 40)
+      ctx.fillStyle = 'rgba(220, 38, 38, 0.85)'
+      ctx.fillRect(0, 0, w, 40)
+      ctx.fillStyle = '#ffffff'
+      ctx.font = 'bold 18px sans-serif'
+      ctx.fillText('顔が検出されませんでした', 12, 26)
       return
     }
 
-    const w = canvas.width
-    const h = canvas.height
-
-    this.drawBbox(ctx, face.bounding_box, w, h)
-
-    for (const eye of [face.eyes.left, face.eyes.right]) {
-      this.drawPolygon(ctx, eye.eye_polygon, w, h, '#ef4444')
-      this.drawCircle(ctx, eye.iris_center, w, h, '#2563eb', eye.iris_radius * Math.min(w, h) * 0.5)
-      this.drawLabel(ctx, eye.iris_center, w, h, eye.state)
-    }
-
-    if (face.mouth.teeth_polygon) {
-      this.drawPolygon(ctx, face.mouth.teeth_polygon, w, h, '#eab308')
-    }
-    this.drawLabel(ctx, this.polygonCenter(face.mouth.teeth_polygon ?? [
-      { x: face.bounding_box.x + face.bounding_box.w / 2, y: face.bounding_box.y + face.bounding_box.h * 0.8 },
-    ]), w, h, face.mouth.state)
-
-    const confLabel = `conf: ${(face.confidence * 100).toFixed(0)}%`
-    ctx.fillStyle = face.confidence >= 0.7 ? '#16a34a' : '#d97706'
-    ctx.font = 'bold 14px monospace'
-    ctx.fillText(confLabel, face.bounding_box.x * w + 4, face.bounding_box.y * h - 6)
-  }
-
-  private drawBbox(
-    ctx: CanvasRenderingContext2D,
-    bbox: { x: number; y: number; w: number; h: number },
-    imgW: number,
-    imgH: number,
-  ): void {
+    // face bbox (green)
     ctx.strokeStyle = '#16a34a'
-    ctx.lineWidth = 2
-    ctx.strokeRect(bbox.x * imgW, bbox.y * imgH, bbox.w * imgW, bbox.h * imgH)
+    ctx.lineWidth = Math.max(2, Math.round(w / 400))
+    ctx.strokeRect(face.bounding_box.x * w, face.bounding_box.y * h, face.bounding_box.w * w, face.bounding_box.h * h)
+
+    // eyes: polygon (red) + iris circle (blue)
+    for (const eye of [face.eyes.left, face.eyes.right]) {
+      this.drawPolygon(ctx, eye.eye_polygon, w, h, '#ef4444', Math.max(1.5, w / 600))
+
+      const cx = eye.iris_center.x * w
+      const cy = eye.iris_center.y * h
+      const radius = eye.iris_radius * Math.min(w, h)
+
+      // iris ring
+      ctx.strokeStyle = '#2563eb'
+      ctx.lineWidth = Math.max(1.5, w / 600)
+      ctx.beginPath()
+      ctx.arc(cx, cy, radius, 0, Math.PI * 2)
+      ctx.stroke()
+
+      // iris center dot
+      ctx.fillStyle = '#2563eb'
+      ctx.beginPath()
+      ctx.arc(cx, cy, Math.max(2, w / 400), 0, Math.PI * 2)
+      ctx.fill()
+
+      this.drawLabel(ctx, cx, cy - radius - 6, eye.state, '#2563eb', w)
+    }
+
+    // teeth polygon (yellow) if mouth open
+    if (face.mouth.teeth_polygon) {
+      this.drawPolygon(ctx, face.mouth.teeth_polygon, w, h, '#eab308', Math.max(1.5, w / 600))
+    }
+
+    // mouth state label
+    const mouthCenter = this.polygonCenter(
+      face.mouth.teeth_polygon ?? [
+        { x: face.bounding_box.x + face.bounding_box.w / 2, y: face.bounding_box.y + face.bounding_box.h * 0.82 },
+      ],
+    )
+    this.drawLabel(ctx, mouthCenter.x * w, mouthCenter.y * h, face.mouth.state, '#eab308', w)
   }
 
   private drawPolygon(
@@ -81,10 +129,11 @@ export default class extends Controller {
     imgW: number,
     imgH: number,
     color: string,
+    lineWidth: number,
   ): void {
     if (points.length < 2) return
     ctx.strokeStyle = color
-    ctx.lineWidth = 2
+    ctx.lineWidth = lineWidth
     ctx.beginPath()
     ctx.moveTo(points[0].x * imgW, points[0].y * imgH)
     for (let i = 1; i < points.length; i++) {
@@ -94,32 +143,22 @@ export default class extends Controller {
     ctx.stroke()
   }
 
-  private drawCircle(
-    ctx: CanvasRenderingContext2D,
-    center: Point,
-    imgW: number,
-    imgH: number,
-    color: string,
-    radius: number,
-  ): void {
-    ctx.fillStyle = color
-    ctx.beginPath()
-    ctx.arc(center.x * imgW, center.y * imgH, Math.max(3, radius), 0, Math.PI * 2)
-    ctx.fill()
-  }
-
   private drawLabel(
     ctx: CanvasRenderingContext2D,
-    point: Point,
-    imgW: number,
-    imgH: number,
+    x: number,
+    y: number,
     text: string,
+    color: string,
+    imgW: number,
   ): void {
-    ctx.fillStyle = 'rgba(0,0,0,0.6)'
-    ctx.fillRect(point.x * imgW, point.y * imgH - 14, text.length * 7, 16)
-    ctx.fillStyle = '#ffffff'
-    ctx.font = '11px monospace'
-    ctx.fillText(text, point.x * imgW + 2, point.y * imgH)
+    const fontPx = Math.max(11, Math.round(imgW / 60))
+    ctx.font = `bold ${fontPx}px ui-monospace, monospace`
+    const padding = 4
+    const textWidth = ctx.measureText(text).width
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)'
+    ctx.fillRect(x, y - fontPx, textWidth + padding * 2, fontPx + padding)
+    ctx.fillStyle = color
+    ctx.fillText(text, x + padding, y - padding)
   }
 
   private polygonCenter(points: Point[]): Point {

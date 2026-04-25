@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@hotwired/stimulus": "latest",
-    "@hotwired/turbo-rails": "latest"
+    "@hotwired/turbo-rails": "latest",
+    "@mediapipe/tasks-vision": "^0.10.34"
   }
 }

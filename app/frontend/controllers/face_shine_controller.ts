@@ -1,13 +1,9 @@
 import { Controller } from '@hotwired/stimulus'
 import { resizeToBase64, dataUrlToBlob } from '../lib/image_resize'
 import { composeFaceEffect, canvasToBlob, imageToCanvas } from '../lib/compose'
+import { detectFaceFromDataUrl, preloadFaceLandmarker } from '../lib/face_landmarker'
 import { postSse } from '../lib/sse_client'
-import type {
-  FaceAnalysisResponse,
-  FaceAnalysisError,
-  FaceData,
-  Intensity,
-} from '../types/face'
+import type { FaceData, Intensity } from '../types/face'
 
 type Stage = 'hero' | 'upload' | 'analyzing' | 'result' | 'verdict' | 'match'
 
@@ -127,6 +123,7 @@ export default class extends Controller {
     this.buildMeshSvg()
     this.buildTicksSvg()
     this.showStage('hero')
+    preloadFaceLandmarker()
   }
 
   disconnect(): void {
@@ -522,37 +519,24 @@ export default class extends Controller {
   private async analyze(): Promise<void> {
     if (!this.originalDataUrl) return
 
-    const blob = dataUrlToBlob(this.originalDataUrl)
-    const formData = new FormData()
-    formData.append('file', blob, 'image.jpg')
-
-    let response: Response
+    let face: FaceData | null
     try {
-      response = await fetch('/api/face_analyses', { method: 'POST', body: formData })
-    } catch {
-      this.showError('ネットワークエラーが発生しました')
+      const detection = await detectFaceFromDataUrl(this.originalDataUrl)
+      face = detection.face
+    } catch (err) {
+      console.error('FaceLandmarker detection error:', err)
+      this.showError('顔検出エンジンの読み込みに失敗しました。通信環境を確認してください。')
       this.showStage('upload')
       return
     }
 
-    if (!response.ok) {
-      const errorBody = (await response.json()) as FaceAnalysisError
-      this.showError(errorBody.advice || '顔の検出に失敗しました')
-      this.showStage('upload')
-      return
-    }
-
-    const data = (await response.json()) as FaceAnalysisResponse
-    const { landmarks, recommended_intensity } = data
-
-    if (!landmarks.face) {
+    if (!face) {
       this.showError('顔が検出されませんでした。正面を向いた写真をお試しください。')
       this.showStage('upload')
       return
     }
 
-    this.faceData = landmarks.face
-    this.intensityValue = recommended_intensity
+    this.faceData = face
 
     await this.waitForAnimationAndCompose()
   }

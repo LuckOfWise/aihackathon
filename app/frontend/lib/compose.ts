@@ -90,14 +90,58 @@ function clipToPolygon(
   ctx.clip()
 }
 
+const FEATHER_PX = 2
+
+// putImageData は ctx.clip() を無視するため、ポリゴン内かどうかを自前で判定する。
+// エッジ付近は FEATHER_PX で滑らかにフェードさせ、矩形っぽい境界を消す。
+function pointInPolygon(x: number, y: number, polygon: Point[]): boolean {
+  let inside = false
+  const n = polygon.length
+  for (let i = 0, j = n - 1; i < n; j = i++) {
+    const xi = polygon[i].x
+    const yi = polygon[i].y
+    const xj = polygon[j].x
+    const yj = polygon[j].y
+    if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) {
+      inside = !inside
+    }
+  }
+  return inside
+}
+
+function pointToSegmentDistance(
+  px: number, py: number,
+  ax: number, ay: number,
+  bx: number, by: number,
+): number {
+  const dx = bx - ax
+  const dy = by - ay
+  const lenSq = dx * dx + dy * dy
+  if (lenSq === 0) return Math.hypot(px - ax, py - ay)
+  const t = Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / lenSq))
+  return Math.hypot(px - (ax + t * dx), py - (ay + t * dy))
+}
+
+function distanceToPolygonEdge(x: number, y: number, polygon: Point[]): number {
+  let minDist = Infinity
+  const n = polygon.length
+  for (let i = 0; i < n; i++) {
+    const a = polygon[i]
+    const b = polygon[(i + 1) % n]
+    const d = pointToSegmentDistance(x, y, a.x, a.y, b.x, b.y)
+    if (d < minDist) minDist = d
+  }
+  return minDist
+}
+
 function applyBrightnessYellowness(
   ctx: CanvasRenderingContext2D,
-  points: Point[],
+  polygon: Point[],
   brightness: number,
   yellowness: number,
 ): void {
-  const xs = points.map((p) => p.x)
-  const ys = points.map((p) => p.y)
+  const xs = polygon.map((p) => p.x)
+  const ys = polygon.map((p) => p.y)
   const minX = Math.floor(Math.min(...xs))
   const minY = Math.floor(Math.min(...ys))
   const maxX = Math.ceil(Math.max(...xs))
@@ -108,22 +152,30 @@ function applyBrightnessYellowness(
 
   const imageData = ctx.getImageData(minX, minY, w, h)
   const data = imageData.data
-  for (let i = 0; i < data.length; i += 4) {
-    data[i] = Math.min(255, data[i] + brightness - yellowness)
-    data[i + 1] = Math.min(255, data[i + 1] + brightness)
-    data[i + 2] = Math.min(255, data[i + 2] + brightness + yellowness)
+  for (let py = 0; py < h; py++) {
+    for (let px = 0; px < w; px++) {
+      const gx = minX + px + 0.5
+      const gy = minY + py + 0.5
+      if (!pointInPolygon(gx, gy, polygon)) continue
+      const edge = distanceToPolygonEdge(gx, gy, polygon)
+      const k = Math.min(1, edge / FEATHER_PX)
+      const i = (py * w + px) * 4
+      data[i] = Math.min(255, data[i] + (brightness - yellowness) * k)
+      data[i + 1] = Math.min(255, data[i + 1] + brightness * k)
+      data[i + 2] = Math.min(255, data[i + 2] + (brightness + yellowness) * k)
+    }
   }
   ctx.putImageData(imageData, minX, minY)
 }
 
 function applySaturation(
   ctx: CanvasRenderingContext2D,
-  points: Point[],
+  polygon: Point[],
   saturationPercent: number,
 ): void {
   if (saturationPercent === 0) return
-  const xs = points.map((p) => p.x)
-  const ys = points.map((p) => p.y)
+  const xs = polygon.map((p) => p.x)
+  const ys = polygon.map((p) => p.y)
   const minX = Math.floor(Math.min(...xs))
   const minY = Math.floor(Math.min(...ys))
   const maxX = Math.ceil(Math.max(...xs))
@@ -135,14 +187,25 @@ function applySaturation(
   const imageData = ctx.getImageData(minX, minY, w, h)
   const data = imageData.data
   const factor = 1 + saturationPercent / 100
-  for (let i = 0; i < data.length; i += 4) {
-    const r = data[i]
-    const g = data[i + 1]
-    const b = data[i + 2]
-    const gray = 0.299 * r + 0.587 * g + 0.114 * b
-    data[i] = Math.min(255, Math.max(0, gray + (r - gray) * factor))
-    data[i + 1] = Math.min(255, Math.max(0, gray + (g - gray) * factor))
-    data[i + 2] = Math.min(255, Math.max(0, gray + (b - gray) * factor))
+  for (let py = 0; py < h; py++) {
+    for (let px = 0; px < w; px++) {
+      const gx = minX + px + 0.5
+      const gy = minY + py + 0.5
+      if (!pointInPolygon(gx, gy, polygon)) continue
+      const edge = distanceToPolygonEdge(gx, gy, polygon)
+      const k = Math.min(1, edge / FEATHER_PX)
+      const i = (py * w + px) * 4
+      const r = data[i]
+      const g = data[i + 1]
+      const b = data[i + 2]
+      const gray = 0.299 * r + 0.587 * g + 0.114 * b
+      const nr = Math.min(255, Math.max(0, gray + (r - gray) * factor))
+      const ng = Math.min(255, Math.max(0, gray + (g - gray) * factor))
+      const nb = Math.min(255, Math.max(0, gray + (b - gray) * factor))
+      data[i] = r + (nr - r) * k
+      data[i + 1] = g + (ng - g) * k
+      data[i + 2] = b + (nb - b) * k
+    }
   }
   ctx.putImageData(imageData, minX, minY)
 }
