@@ -15,6 +15,14 @@
 4. テスト・lint・design レビューは速度に応じて省略可（CI 真っ赤を避ける最低限のみ）
 5. サブエージェントを起動するときは、プロンプトに**作業 worktree のフルパス**を必ず明記する
 
+**並行する役割分担**（別セッションで運用）:
+- **開発セッション**: feature 開発 → PR 作成（本セッションがこれ）
+- **QA セッション**: `/watch-pr` ループで PR を順次レビュー & プレビュー動作確認 & マージ
+  - `/loop 90 /watch-pr` で 90 秒間隔の自動監視
+  - 専用 worktree `.claude/worktrees/qa-review` で動作（feature 開発と衝突しない）
+  - main 向け PR は CRITICAL 問題が無ければ全て取り込む（ハッカソン方針）
+  - 詳細: [.claude/commands/watch-pr.md](.claude/commands/watch-pr.md)
+
 通常の「拡張サイクル / 軽量サイクル」（後述）はハッカソン終了後の通常開発時に従うルール。当日は上記が優先。
 
 ## プロジェクト概要

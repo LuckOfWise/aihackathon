@@ -79,6 +79,23 @@ bin/hack-start feat/bar   # → .claude/worktrees/feat-bar
 
 それぞれ別エージェントに別 worktree を割り当てて並列実行できる。
 
+## QA セッション（別セッション・別 worktree）
+
+開発セッションが PR を量産するのと並行して、別セッションで `/watch-pr` を回し、**main 向け PR を順次レビュー & プレビュー動作確認 & マージ**する。
+
+```bash
+# QA セッションで:
+/loop 90 /watch-pr
+```
+
+- 専用 worktree: `.claude/worktrees/qa-review`
+- COMPOSE_PROJECT_NAME と preview port が他 worktree と分離されているので衝突しない
+- 方針: **main 向け PR は CRITICAL 問題が無い限り全て取り込む**
+- プレビュー動作確認は省略しない（[.claude/rules/preview-verification.md](./preview-verification.md)）
+- 詳細フロー: [.claude/commands/watch-pr.md](../commands/watch-pr.md)
+
+開発セッションは worktree (`.claude/worktrees/feat-*`) で実装 → PR 作成までやれば、後は QA セッションが拾ってマージしてくれる。
+
 ## 速度優先チェックリスト（残り時間別）
 
 ### 残り 2 時間以上
