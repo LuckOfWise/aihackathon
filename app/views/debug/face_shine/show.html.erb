@@ -1,0 +1,42 @@
+<% content_for :title, 'Debug: 顔ランドマーク確認' %>
+
+<div class="face-shine-debug">
+  <header class="face-shine-debug__header">
+    <div class="face-shine-debug__mark">DEBUG</div>
+    <h1 class="face-shine-debug__title">顔ランドマーク確認</h1>
+    <p class="face-shine-debug__lede">AI が検出した座標を画像にオーバーレイ表示。development 環境のみ。</p>
+  </header>
+
+  <%= form_with url: debug_face_shine_path, method: :post, class: "face-shine-debug__form", multipart: true do |f| %>
+    <div class="field">
+      <%= f.label :image, "画像ファイル", class: "field__label" %>
+      <%= f.file_field :image, accept: "image/png,image/jpeg,image/webp", class: "field__input", required: true %>
+      <p class="field__hint">PNG / JPEG / WebP のみ</p>
+    </div>
+    <div class="face-shine-debug__submit">
+      <%= f.submit "解析", class: "button", data: { variant: "primary" } %>
+    </div>
+  <% end %>
+
+  <% if @landmarks.present? %>
+    <div class="face-shine-debug__result"
+         data-controller="face-shine-debug"
+         data-face-shine-debug-landmarks-value="<%= @landmarks.to_json %>">
+      <canvas
+        class="face-shine-debug__canvas"
+        data-face-shine-debug-target="canvas">
+      </canvas>
+      <img
+        class="face-shine-debug__source"
+        src="<%= @preview_data_url %>"
+        alt="解析対象"
+        data-face-shine-debug-target="source"
+        style="display:none;">
+
+      <details class="face-shine-debug__json">
+        <summary class="face-shine-debug__json-toggle">Raw JSON</summary>
+        <pre class="face-shine-debug__json-body"><%= JSON.pretty_generate(@landmarks) %></pre>
+      </details>
+    </div>
+  <% end %>
+</div>

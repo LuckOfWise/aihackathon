@@ -11,5 +11,16 @@ Rails.application.routes.draw do
     resource :extract, only: %i[show create], controller: 'extracts'
   end
 
-  root 'items#index'
+  namespace :api do
+    resources :face_analyses, only: :create
+    resources :shine_reviews, only: :create
+  end
+
+  namespace :debug do
+    resource :face_shine, only: %i[show create], controller: 'face_shine'
+  end
+
+  resource :face_shine, only: :show, controller: 'face_shine'
+
+  root 'face_shine#show'
 end

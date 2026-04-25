@@ -1,0 +1,211 @@
+.shine-verdict {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, #0e0a02 0%, var(--shine-ink) 40%);
+}
+
+.shine-verdict__nav {
+  padding: 10px 20px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.shine-verdict__back {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 0.5px solid var(--shine-line-2);
+  background: transparent;
+  color: var(--shine-bone);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+
+  &:hover { background: rgba(245, 241, 232, 0.06); }
+
+  &:focus-visible {
+    outline: 2px solid var(--shine-gold);
+    outline-offset: 2px;
+  }
+}
+
+.shine-verdict__body {
+  padding: 4px 20px 18px;
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.shine-verdict__masthead {
+  border-top: 0.5px solid var(--shine-gold);
+  border-bottom: 0.5px solid var(--shine-gold);
+  padding: 10px 0;
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--shine-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.22em;
+  color: var(--shine-gold);
+  text-transform: uppercase;
+}
+
+.shine-verdict__headline-group {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.shine-verdict__on-matter {
+  font-family: var(--shine-serif-en);
+  font-style: italic;
+  font-size: 14px;
+  color: var(--shine-gold-soft);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.shine-verdict__headline {
+  font-family: var(--shine-serif-en);
+  font-weight: 500;
+  font-size: clamp(40px, 13vw, 52px);
+  line-height: 0.92;
+  letter-spacing: -0.02em;
+  color: var(--shine-bone);
+  margin: 0;
+  word-break: normal;
+
+  em { font-style: italic; }
+}
+
+.shine-verdict__jp-headline {
+  font-family: var(--shine-serif-jp);
+  font-size: 14px;
+  letter-spacing: 0.4em;
+  color: var(--shine-gold);
+  margin: 0;
+}
+
+.shine-verdict__critique {
+  font-family: var(--shine-serif-jp);
+  font-size: 14px;
+  line-height: 2;
+  color: var(--shine-bone);
+  letter-spacing: 0.04em;
+  overflow: hidden;
+}
+
+.shine-verdict__dropcap {
+  float: left;
+  font-family: var(--shine-serif-en);
+  font-style: italic;
+  font-size: 62px;
+  line-height: 0.78;
+  color: var(--shine-gold);
+  margin-right: 8px;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+.shine-verdict__critique-body {
+  display: block;
+}
+
+.shine-verdict__key-phrase {
+  font-family: var(--shine-serif-en);
+  font-style: italic;
+  color: var(--shine-gold);
+}
+
+.shine-verdict__signature {
+  border: 0.5px solid var(--shine-gold);
+  border-radius: 4px;
+  padding: 14px 16px;
+  background: linear-gradient(180deg, rgba(212, 175, 55, 0.06), transparent);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.shine-verdict__claude-sig {
+  font-family: var(--shine-serif-en);
+  font-style: italic;
+  font-size: 22px;
+  color: var(--shine-gold);
+  letter-spacing: 0.04em;
+  margin: 2px 0;
+}
+
+.shine-verdict__model {
+  font-size: 8.5px;
+  color: var(--shine-bone-mute);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.shine-verdict__seal {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  border: 0.5px solid var(--shine-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.18), transparent 70%);
+  flex-shrink: 0;
+}
+
+.shine-verdict__seal-text {
+  font-family: var(--shine-serif-en);
+  font-style: italic;
+  font-size: 16px;
+  color: var(--shine-gold);
+}
+
+.shine-verdict__seal-ring {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 0.5px dashed var(--shine-gold);
+  opacity: 0.4;
+  animation: shine-rotate360 24s linear infinite;
+}
+
+.shine-verdict__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.shine-verdict__tag {
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  color: var(--shine-gold-soft);
+  padding: 5px 10px;
+  border: 0.5px solid var(--shine-line-2);
+  border-radius: 999px;
+}
+
+.shine-verdict__score {
+  text-align: center;
+  font-size: 11px;
+  min-height: 20px;
+}
+
+.shine-verdict__cta {
+  height: 50px;
+  font-size: 11px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shine-verdict__seal-ring { animation: none; }
+}
