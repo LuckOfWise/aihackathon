@@ -43,7 +43,11 @@ class ShineReviewAgent < ApplicationAgent
 
   def comment
     @shined_image = params[:shined_image]
-    prompt(image: @shined_image, model: 'claude-haiku-4-5')
+    prompt(
+      image: @shined_image,
+      instructions: { template: 'comment' },
+      model: 'claude-haiku-4-5'
+    )
   end
 
   def score
@@ -54,6 +58,7 @@ class ShineReviewAgent < ApplicationAgent
         { image: @original_image },
         { image: @shined_image },
       ],
+      instructions: { template: 'score' },
       tools: [SCORE_TOOL],
       tool_choice: { type: 'tool', name: 'report_shine_score' }
     )
@@ -63,6 +68,7 @@ class ShineReviewAgent < ApplicationAgent
     @shined_image = params[:shined_image]
     prompt(
       image: @shined_image,
+      instructions: { template: 'validate_quality' },
       tools: [VALIDATE_TOOL],
       tool_choice: { type: 'tool', name: 'report_quality_validation' }
     )

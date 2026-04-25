@@ -108,6 +108,7 @@ class FaceLandmarkAgent < ApplicationAgent
     @image = params[:image]
     prompt(
       image: @image,
+      instructions: { template: 'detect' },
       tools: [DETECT_TOOL],
       tool_choice: { type: 'tool', name: 'report_face_landmarks' }
     )
@@ -117,6 +118,7 @@ class FaceLandmarkAgent < ApplicationAgent
     @image = params[:image]
     prompt(
       image: @image,
+      instructions: { template: 'recommend_intensity' },
       tools: [INTENSITY_TOOL],
       tool_choice: { type: 'tool', name: 'report_recommended_intensity' }
     )
@@ -125,7 +127,10 @@ class FaceLandmarkAgent < ApplicationAgent
   def advise_retake
     @image = params[:image]
     @failure_reason = params[:failure_reason]
-    prompt(image: @image)
+    prompt(
+      image: @image,
+      instructions: { template: 'advise_retake' }
+    )
   end
 
   def report_face_landmarks(**input)
