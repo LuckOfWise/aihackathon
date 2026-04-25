@@ -127,6 +127,95 @@
 }
 
 // -----------------------------------------------------------------------------
+// SHINE-MATE Design Tokens（face_shine 機能専用 / dark luxury）
+// ダーク固定。既存ライトテーマとは分離し --shine-* プレフィックスで管理。
+// -----------------------------------------------------------------------------
+
+:root {
+  // ---- Ink ----
+  --shine-ink: #050507;
+  --shine-ink-2: #0e0e12;
+  --shine-ink-3: #16161c;
+
+  // ---- Bone (dark 背景上のテキスト) ----
+  --shine-bone: #f5f1e8;
+  --shine-bone-dim: rgba(245, 241, 232, 0.62);
+  --shine-bone-mute: rgba(245, 241, 232, 0.38);
+
+  // ---- Gold ----
+  --shine-gold: #d4af37;
+  --shine-gold-soft: #e8c76b;
+  --shine-gold-deep: #9c7a1f;
+
+  // ---- AI cyan ----
+  --shine-ai: #00f2ff;
+  --shine-ai-dim: rgba(0, 242, 255, 0.32);
+
+  // ---- Rose ----
+  --shine-rose: #e8a8b8;
+
+  // ---- Lines ----
+  --shine-line: rgba(245, 241, 232, 0.08);
+  --shine-line-2: rgba(245, 241, 232, 0.16);
+
+  // ---- Typography ----
+  --shine-serif-en: 'Cormorant Garamond', 'Times New Roman', serif;
+  --shine-serif-jp: 'Shippori Mincho', 'Yu Mincho', 'Hiragino Mincho ProN', serif;
+  --shine-sans: 'Inter', 'Noto Sans JP', system-ui, sans-serif;
+  --shine-mono: 'JetBrains Mono', 'SF Mono', ui-monospace, monospace;
+}
+
+// ---- Keyframe Animations ----
+@keyframes shine-drift {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(8px, -12px, 0); }
+}
+
+@keyframes shine-shimmer {
+  0% { transform: translateY(0) scale(1); opacity: 0; }
+  10% { opacity: 0.9; }
+  90% { opacity: 0.6; }
+  100% { transform: translateY(-180px) scale(0.4); opacity: 0; }
+}
+
+@keyframes shine-scan-y {
+  0% { top: -2%; }
+  100% { top: 102%; }
+}
+
+@keyframes shine-blink {
+  0%, 40%, 60%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+
+@keyframes shine-rotate360 {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes shine-flicker {
+  0%, 100% { opacity: 1; }
+  45% { opacity: 0.55; }
+  55% { opacity: 0.92; }
+}
+
+@keyframes shine-fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shine-flash {
+  0% { opacity: 0; }
+  30% { opacity: 0.9; }
+  100% { opacity: 0; }
+}
+
+@keyframes shine-pulse-halo {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.05); }
+}
+
+// -----------------------------------------------------------------------------
 // Theme: Dusk（薄暗い / 青みの強い世界観）
 // 使用例: <html data-theme="dusk">
 // 当日テーマに合わせて color ブロックを差し替えるだけで全UIが切り替わる

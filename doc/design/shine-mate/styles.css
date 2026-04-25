@@ -1,0 +1,85 @@
+/* SHINE-MATE :: Design tokens & global styles */
+:root{
+  --ink:#050507;
+  --ink-2:#0E0E12;
+  --ink-3:#16161C;
+  --line:rgba(245,241,232,0.08);
+  --line-2:rgba(245,241,232,0.16);
+  --bone:#F5F1E8;
+  --bone-dim:rgba(245,241,232,0.62);
+  --bone-mute:rgba(245,241,232,0.38);
+  --gold:#D4AF37;
+  --gold-soft:#E8C76B;
+  --gold-deep:#9C7A1F;
+  --ai:#00F2FF;
+  --ai-dim:rgba(0,242,255,0.32);
+  --rose:#E8A8B8;
+  --serif-en:'Cormorant Garamond', 'Times New Roman', serif;
+  --serif-jp:'Shippori Mincho', 'Yu Mincho', 'Hiragino Mincho ProN', serif;
+  --sans:'Inter','Noto Sans JP',ui-sans-serif,system-ui,sans-serif;
+  --mono:'JetBrains Mono','SF Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box;-webkit-font-smoothing:antialiased}
+html,body{margin:0;padding:0;background:var(--ink);color:var(--bone);font-family:var(--sans)}
+body{overflow:hidden}
+
+/* ── Telemetry mono ─────────────────────────────── */
+.mono{font-family:var(--mono);font-feature-settings:"tnum","ss01"}
+
+/* ── Hairlines ──────────────────────────────────── */
+.hair{height:.5px;background:var(--line);width:100%}
+.hair-gold{height:.5px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+
+/* ── Buttons ────────────────────────────────────── */
+.btn-gold{
+  appearance:none;border:.5px solid var(--gold);
+  background:linear-gradient(180deg,#E8C76B 0%, #D4AF37 50%, #9C7A1F 100%);
+  color:#1A1408;font-family:var(--sans);font-weight:600;letter-spacing:.04em;
+  height:48px;padding:0 22px;border-radius:999px;cursor:pointer;
+  text-transform:uppercase;font-size:11px;
+  box-shadow:0 1px 0 rgba(255,255,255,.4) inset, 0 8px 32px rgba(212,175,55,.25);
+  transition:transform .15s, box-shadow .25s;
+}
+.btn-gold:hover{transform:translateY(-1px);box-shadow:0 1px 0 rgba(255,255,255,.5) inset, 0 12px 44px rgba(212,175,55,.4)}
+.btn-gold:active{transform:translateY(0)}
+
+.btn-ghost{
+  appearance:none;border:.5px solid var(--line-2);background:transparent;
+  color:var(--bone);font-family:var(--sans);font-weight:500;
+  height:44px;padding:0 18px;border-radius:999px;cursor:pointer;font-size:12px;
+  letter-spacing:.04em;text-transform:uppercase;
+}
+.btn-ghost:hover{background:rgba(245,241,232,.04);border-color:var(--gold)}
+
+/* ── Card surfaces ──────────────────────────────── */
+.surface{
+  background:linear-gradient(180deg, rgba(245,241,232,.02), rgba(245,241,232,.005));
+  border:.5px solid var(--line);border-radius:18px;
+}
+
+/* ── Particle layer (decorative, gpu) ───────────── */
+@keyframes pulseHalo{0%,100%{opacity:.3;transform:scale(1)}50%{opacity:.7;transform:scale(1.05)}}
+@keyframes shimmer{0%{transform:translateY(0) scale(1);opacity:0}10%{opacity:.9}90%{opacity:.6}100%{transform:translateY(-180px) scale(.4);opacity:0}}
+@keyframes scanY{0%{top:-2%}100%{top:102%}}
+@keyframes blink{0%,40%,60%,100%{opacity:1}50%{opacity:.2}}
+@keyframes rotate360{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes flicker{0%,100%{opacity:1}45%{opacity:.55}55%{opacity:.92}}
+@keyframes drift{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(8px,-12px,0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes flash{0%{opacity:0}30%{opacity:.9}100%{opacity:0}}
+@keyframes typewriter{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+
+.fade-up{animation:fadeUp .6s cubic-bezier(.2,.7,.2,1) both}
+
+/* ── Letter-spaced spec captions ────────────────── */
+.spec{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--bone-mute)}
+
+/* ── Glyph: small gold diamond ──────────────────── */
+.diamond{display:inline-block;width:6px;height:6px;background:var(--gold);transform:rotate(45deg);vertical-align:middle}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:6px}
+
+/* selection */
+::selection{background:var(--gold);color:var(--ink)}

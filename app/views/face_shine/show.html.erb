@@ -1,0 +1,430 @@
+<% content_for :title, 'SHINE-MATE — 内なる輝きの可視化' %>
+
+<div class="shine-mate"
+     data-controller="face-shine"
+     data-face-shine-stage-value="hero"
+     data-face-shine-intensity-value="standard">
+
+  <%# Flash overlay (analyzing → result transition) %>
+  <div class="shine-mate__flash" data-face-shine-target="flashOverlay" aria-hidden="true"></div>
+
+  <%# ───────────── STAGE: hero ───────────── %>
+  <section class="shine-hero" data-face-shine-target="stageHero">
+    <%# Drift particles %>
+    <div class="shine-hero__particles" aria-hidden="true">
+      <% 24.times do |i| %>
+        <span class="shine-hero__particle" style="left:<%= (i*37)%100 %>%;top:<%= (i*53)%100 %>%;animation-delay:<%= (i*0.2).round(1) %>s;animation-duration:<%= 6+(i%5) %>s;opacity:<%= ((0.3 + (i%4)*0.15)*100).round / 100.0 %>"></span>
+      <% end %>
+    </div>
+
+    <div class="shine-hero__body">
+      <header class="shine-hero__header">
+        <div class="shine-hero__spec shine-hero__spec--gold">
+          <span class="shine-diamond" aria-hidden="true"></span>
+          SHINE-MATE&nbsp;&nbsp;·&nbsp;&nbsp;EST. 2026
+        </div>
+        <div class="shine-hero__spec shine-hero__spec--mute">
+          ALL-JAPAN AI HACKATHON · OFFICIAL ENTRY №073
+        </div>
+      </header>
+
+      <div class="shine-hero__center">
+        <p class="shine-hero__jp-sub">其ノ瞳ハ、未ダ磨カレザル</p>
+        <h1 class="shine-hero__headline" aria-label="Shine from 内側">
+          <em class="shine-hero__headline-em">Shine</em><br>
+          from<br>
+          <span class="shine-hero__headline-jp">内側</span>
+        </h1>
+        <p class="shine-hero__lede">
+          くすんだ日常の一枚を、<br>
+          ダイヤモンドの輝きへ。<br>
+          AIが、あなたの「未だ磨かれざる魅力」を<br>
+          発掘し、発光させます。
+        </p>
+      </div>
+
+      <footer class="shine-hero__footer">
+        <button class="btn-gold shine-hero__cta"
+                data-action="click->face-shine#gotoUpload">
+          写真をアップロードして始める →
+        </button>
+        <div class="shine-hero__meta">
+          <span>v0.9.3 · BETA</span>
+          <span>POWERED BY CLAUDE</span>
+        </div>
+      </footer>
+    </div>
+  </section>
+
+  <%# ───────────── STAGE: upload ───────────── %>
+  <section class="shine-upload" data-face-shine-target="stageUpload" hidden>
+    <div class="shine-upload__nav">
+      <button class="shine-upload__back" aria-label="戻る"
+              data-action="click->face-shine#gotoHero">
+        <svg width="9" height="14" viewBox="0 0 9 14" fill="none" aria-hidden="true">
+          <path d="M8 1L1 7l7 6" stroke="currentColor" stroke-width="1.2" />
+        </svg>
+      </button>
+      <span class="shine-spec shine-spec--mute">01 / 03 · UPLOAD</span>
+      <span class="shine-diamond" aria-hidden="true"></span>
+    </div>
+
+    <div class="shine-upload__body">
+      <h2 class="shine-upload__title">原石を、<br>差し出してください。</h2>
+      <p class="shine-upload__desc">
+        顔がはっきりと写った、自然光下の一枚を推奨します。<br>
+        解析時間：約 12 秒。
+      </p>
+
+      <label class="shine-upload__dropzone" for="shine-file-input">
+        <span class="shine-upload__corner shine-upload__corner--tl" aria-hidden="true"></span>
+        <span class="shine-upload__corner shine-upload__corner--tr" aria-hidden="true"></span>
+        <span class="shine-upload__corner shine-upload__corner--bl" aria-hidden="true"></span>
+        <span class="shine-upload__corner shine-upload__corner--br" aria-hidden="true"></span>
+        <span class="shine-upload__icon-ring" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+            <path d="M11 2v14m0-14L5 8m6-6l6 6M3 18h16" stroke="var(--shine-gold)" stroke-width="1" />
+          </svg>
+        </span>
+        <span class="shine-upload__dropzone-label">タップして写真を選ぶ</span>
+        <span class="shine-spec shine-spec--mute">JPG · PNG · HEIC · ≤ 12MB</span>
+        <input
+          id="shine-file-input"
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+          class="shine-upload__file-input"
+          data-face-shine-target="fileInput"
+          data-action="change->face-shine#onFileChange"
+          aria-label="写真ファイルを選択">
+      </label>
+
+      <div class="shine-upload__hints" role="list">
+        <div class="shine-upload__hint" role="listitem">
+          <span class="shine-upload__hint-jp">明所</span>
+          <span class="shine-spec shine-spec--mute">Bright</span>
+        </div>
+        <div class="shine-upload__hint" role="listitem">
+          <span class="shine-upload__hint-jp">正面</span>
+          <span class="shine-spec shine-spec--mute">Front</span>
+        </div>
+        <div class="shine-upload__hint" role="listitem">
+          <span class="shine-upload__hint-jp">素顔</span>
+          <span class="shine-spec shine-spec--mute">Bare</span>
+        </div>
+      </div>
+
+      <p class="shine-upload__error" data-face-shine-target="errorMessage" hidden role="alert"></p>
+    </div>
+  </section>
+
+  <%# ───────────── STAGE: analyzing ───────────── %>
+  <section class="shine-analyzing" data-face-shine-target="stageAnalyzing" hidden aria-live="polite">
+    <div class="shine-analyzing__nav">
+      <div style="width:34px"></div>
+      <span class="shine-spec shine-spec--mute">02 / 03 · ANALYZING</span>
+      <span class="shine-diamond" aria-hidden="true"></span>
+    </div>
+
+    <div class="shine-analyzing__body">
+      <div class="shine-analyzing__canvas-wrap">
+        <%# Original image (dimmed) %>
+        <img class="shine-analyzing__img" data-face-shine-target="analyzingImg" alt="" aria-hidden="true">
+        <%# SVG overlay (face mesh + bbox + scan) %>
+        <svg class="shine-analyzing__overlay-svg"
+             viewBox="0 0 320 400"
+             preserveAspectRatio="xMidYMid slice"
+             aria-hidden="true"
+             data-face-shine-target="overlaySvg">
+          <defs>
+            <filter id="ai-glow">
+              <feGaussianBlur stdDeviation="1.2" />
+              <feMerge>
+                <feMergeNode />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+          <g class="shine-analyzing__mesh-edges" data-face-shine-target="meshEdges" opacity="0" filter="url(#ai-glow)"></g>
+          <g class="shine-analyzing__mesh-dots" data-face-shine-target="meshDots" opacity="0"></g>
+          <g class="shine-analyzing__bbox-group" data-face-shine-target="bboxGroup" opacity="0"></g>
+          <g class="shine-analyzing__reticle-group" data-face-shine-target="reticleGroup" opacity="0"></g>
+          <g class="shine-analyzing__ticks" data-face-shine-target="tickGroup" opacity="0"></g>
+        </svg>
+        <%# HTML labels %>
+        <div class="shine-analyzing__labels" data-face-shine-target="overlayLabels" aria-hidden="true" style="opacity:0">
+          <span class="shine-analyzing__label shine-analyzing__label--iris-l">IRIS_L · 0.94 ▲12%</span>
+          <span class="shine-analyzing__label shine-analyzing__label--iris-r">IRIS_R · 0.96 ▲14%</span>
+          <span class="shine-analyzing__label shine-analyzing__label--dent">DENTITION · 0.88 ▲ENAMEL</span>
+        </div>
+        <%# Scan line %>
+        <div class="shine-analyzing__scan" data-face-shine-target="scanLine" aria-hidden="true"></div>
+        <%# AI pulse tint %>
+        <div class="shine-analyzing__ai-pulse" aria-hidden="true"></div>
+        <%# Frame corners %>
+        <div class="shine-analyzing__corners" aria-hidden="true">
+          <span class="shine-analyzing__corner shine-analyzing__corner--tl"></span>
+          <span class="shine-analyzing__corner shine-analyzing__corner--tr"></span>
+          <span class="shine-analyzing__corner shine-analyzing__corner--bl"></span>
+          <span class="shine-analyzing__corner shine-analyzing__corner--br"></span>
+        </div>
+      </div>
+
+      <div class="shine-analyzing__info">
+        <p class="shine-analyzing__headline">魅力を、解析中。</p>
+        <div class="shine-analyzing__pct mono" data-face-shine-target="progressPct" aria-live="polite">
+          <span data-face-shine-target="progressNum">00</span><span class="shine-analyzing__pct-unit">%</span>
+        </div>
+      </div>
+
+      <div class="shine-analyzing__progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" data-face-shine-target="progressBar">
+        <div class="shine-analyzing__progress-fill" data-face-shine-target="progressFill"></div>
+      </div>
+
+      <div class="shine-analyzing__log mono" data-face-shine-target="logPanel" aria-live="polite" aria-atomic="false">
+      </div>
+    </div>
+  </section>
+
+  <%# ───────────── STAGE: result ───────────── %>
+  <section class="shine-result" data-face-shine-target="stageResult" hidden>
+    <div class="shine-result__nav">
+      <button class="shine-result__back" aria-label="戻る"
+              data-action="click->face-shine#gotoAnalyzing">
+        <svg width="9" height="14" viewBox="0 0 9 14" fill="none" aria-hidden="true">
+          <path d="M8 1L1 7l7 6" stroke="currentColor" stroke-width="1.2" />
+        </svg>
+      </button>
+      <span class="shine-spec shine-spec--mute">03 / 03 · VERDICT</span>
+      <span class="shine-diamond" aria-hidden="true"></span>
+    </div>
+
+    <div class="shine-result__body">
+      <div class="shine-result__eyebrow">
+        <span class="shine-diamond" aria-hidden="true"></span>
+        SHINE INDEX · + 38.4 PT
+      </div>
+      <h2 class="shine-result__headline">
+        発光、完了。<br>
+        <em class="shine-result__headline-en">Behold.</em>
+      </h2>
+
+      <%# Before/After slider %>
+      <div class="shine-result__slider-wrap"
+           data-controller="ba-slider"
+           role="group"
+           aria-label="Before / After 比較">
+        <div class="shine-result__after" data-ba-slider-target="after">
+          <canvas class="shine-result__canvas" data-face-shine-target="resultCanvas" aria-label="加工後の画像"></canvas>
+        </div>
+        <div class="shine-result__before" data-ba-slider-target="before">
+          <img class="shine-result__before-img" data-face-shine-target="beforeImg" alt="加工前の画像">
+        </div>
+        <div class="shine-result__divider" data-ba-slider-target="divider">
+          <div class="shine-result__handle" aria-label="スライダー">
+            <svg width="14" height="10" viewBox="0 0 14 10" fill="none" aria-hidden="true">
+              <path d="M5 1L1 5l4 4M9 1l4 4-4 4" stroke="var(--shine-gold)" stroke-width="1.2" stroke-linecap="round" />
+            </svg>
+          </div>
+        </div>
+        <div class="shine-result__shimmer-layer" data-ba-slider-target="shimmer" aria-hidden="true">
+          <% 14.times do |i| %>
+            <span class="shine-result__shimmer-particle"
+                  style="left:<%= (i*23)%100 %>%;top:<%= (i*17)%100 %>%;animation-delay:<%= ((i%5)*0.15).round(2) %>s;animation-duration:<%= (1.6+(i%3)*0.4).round(1) %>s">
+            </span>
+          <% end %>
+        </div>
+        <div class="shine-result__label-before mono" data-ba-slider-target="labelBefore">◯ BEFORE</div>
+        <div class="shine-result__label-after mono" data-ba-slider-target="labelAfter">★ AFTER</div>
+      </div>
+
+      <%# Metrics %>
+      <div class="shine-result__metrics" role="list">
+        <div class="shine-result__metric" role="listitem">
+          <div class="shine-result__metric-val mono" data-face-shine-target="metricEye">+12%</div>
+          <div class="shine-spec shine-spec--mute shine-result__metric-key">EYE LUMINANCE</div>
+          <div class="shine-result__metric-jp">瞳の輝き</div>
+        </div>
+        <div class="shine-result__metric" role="listitem">
+          <div class="shine-result__metric-val mono" data-face-shine-target="metricEnamel">+18%</div>
+          <div class="shine-spec shine-spec--mute shine-result__metric-key">ENAMEL CHROMA</div>
+          <div class="shine-result__metric-jp">歯の白さ</div>
+        </div>
+        <div class="shine-result__metric" role="listitem">
+          <div class="shine-result__metric-val mono" data-face-shine-target="metricAttract">+38.4</div>
+          <div class="shine-spec shine-spec--mute shine-result__metric-key">ATTRACT INDEX</div>
+          <div class="shine-result__metric-jp">魅力指数</div>
+        </div>
+      </div>
+
+      <%# Intensity selector %>
+      <div class="shine-result__intensity"
+           data-controller="intensity-selector"
+           data-intensity-selector-selected-value="standard"
+           data-action="intensity-selector:change->face-shine#onIntensityChange"
+           role="group"
+           aria-label="輝き強度">
+        <button class="shine-result__intensity-btn"
+                data-intensity-selector-target="option"
+                data-intensity="subtle"
+                data-action="click->intensity-selector#select"
+                aria-pressed="false">
+          控えめ
+        </button>
+        <button class="shine-result__intensity-btn is-active"
+                data-intensity-selector-target="option"
+                data-intensity="standard"
+                data-action="click->intensity-selector#select"
+                aria-pressed="true">
+          標準
+        </button>
+        <button class="shine-result__intensity-btn"
+                data-intensity-selector-target="option"
+                data-intensity="sparkle"
+                data-action="click->intensity-selector#select"
+                aria-pressed="false">
+          キラキラ ✦
+        </button>
+      </div>
+
+      <button class="btn-gold shine-result__cta"
+              data-action="click->face-shine#gotoVerdict">
+        AIによる魅力鑑定書を読む →
+      </button>
+
+      <button class="shine-result__download"
+              data-action="click->face-shine#download"
+              data-face-shine-target="downloadButton">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="7 10 12 15 17 10" />
+          <line x1="12" y1="15" x2="12" y2="3" />
+        </svg>
+        ダウンロード
+      </button>
+    </div>
+  </section>
+
+  <%# ───────────── STAGE: verdict ───────────── %>
+  <section class="shine-verdict" data-face-shine-target="stageVerdict" hidden>
+    <div class="shine-verdict__nav">
+      <button class="shine-verdict__back" aria-label="戻る"
+              data-action="click->face-shine#gotoResult">
+        <svg width="9" height="14" viewBox="0 0 9 14" fill="none" aria-hidden="true">
+          <path d="M8 1L1 7l7 6" stroke="currentColor" stroke-width="1.2" />
+        </svg>
+      </button>
+      <span class="shine-spec shine-spec--mute">· · VERDICT BY CLAUDE</span>
+      <span class="shine-diamond" aria-hidden="true"></span>
+    </div>
+
+    <div class="shine-verdict__body">
+      <div class="shine-verdict__masthead">
+        <span>VOL. ИХ</span>
+        <span>SHINE-MATE QUARTERLY</span>
+        <span>26 / SS</span>
+      </div>
+
+      <div class="shine-verdict__headline-group">
+        <p class="shine-verdict__on-matter">— On the matter of —</p>
+        <h1 class="shine-verdict__headline" aria-label="Quiet Radiance">
+          <em>Quiet</em><br>
+          Radiance,
+        </h1>
+        <p class="shine-verdict__jp-headline">静カナル、爆発。</p>
+      </div>
+
+      <div class="shine-verdict__critique">
+        <span class="shine-verdict__dropcap" aria-hidden="true">こ</span>
+        <span class="shine-verdict__critique-body" data-face-shine-target="commentDisplay">
+          のひと、目で語る人だ。瞳の奥に小さな星が一つ、ちゃんと棲んでいる。
+          歯のラインは雨上がりのような清潔さで、笑った瞬間、街全体の彩度が0.3上がる。<br><br>
+          結論：<em class="shine-verdict__key-phrase">A diamond, mid-cut.</em> 磨けば、磨くほど、化ける。
+        </span>
+      </div>
+
+      <div class="shine-verdict__signature">
+        <div>
+          <div class="shine-spec shine-spec--mute">SIGNED</div>
+          <div class="shine-verdict__claude-sig">Claude, c.</div>
+          <div class="shine-verdict__model mono">MODEL: claude-haiku-4-5</div>
+        </div>
+        <div class="shine-verdict__seal" aria-label="SHINE-MATE 公式シール">
+          <span class="shine-verdict__seal-text">SM</span>
+          <span class="shine-verdict__seal-ring" aria-hidden="true"></span>
+        </div>
+      </div>
+
+      <div class="shine-verdict__tags" role="list">
+        <% ['#QuietRadiance','#MidCutDiamond','#SmilePotential','#内なる発光','#瞳力'].each do |tag| %>
+          <span class="shine-verdict__tag mono" role="listitem"><%= tag %></span>
+        <% end %>
+      </div>
+
+      <div class="shine-verdict__score shine-spec shine-spec--mute" data-face-shine-target="scoreDisplay"></div>
+
+      <button class="btn-gold shine-verdict__cta"
+              data-action="click->face-shine#gotoMatch">
+        マッチング画面で輝かせる →
+      </button>
+    </div>
+  </section>
+
+  <%# ───────────── STAGE: match ───────────── %>
+  <section class="shine-match" data-face-shine-target="stageMatch" hidden>
+    <div class="shine-match__nav">
+      <button class="shine-match__back" aria-label="戻る"
+              data-action="click->face-shine#gotoVerdict">
+        <svg width="9" height="14" viewBox="0 0 9 14" fill="none" aria-hidden="true">
+          <path d="M8 1L1 7l7 6" stroke="currentColor" stroke-width="1.2" />
+        </svg>
+      </button>
+      <span class="shine-spec shine-spec--mute">LIVE PREVIEW</span>
+      <span class="shine-diamond" aria-hidden="true"></span>
+    </div>
+
+    <div class="shine-match__body">
+      <div class="shine-match__eyebrow">
+        <span class="shine-diamond" aria-hidden="true"></span>
+        DEPLOYED TO YOUR DATING APP
+      </div>
+      <h2 class="shine-match__headline">こうして、相手に届きます。</h2>
+
+      <div class="shine-match__stack" aria-label="マッチングアプリプレビュー" role="img">
+        <div class="shine-match__card shine-match__card--back2" aria-hidden="true"></div>
+        <div class="shine-match__card shine-match__card--back1" aria-hidden="true"></div>
+
+        <div class="shine-match__card shine-match__card--front">
+          <canvas class="shine-match__photo" data-face-shine-target="matchCanvas" aria-hidden="true"></canvas>
+          <div class="shine-match__shimmer-overlay" aria-hidden="true"></div>
+          <div class="shine-match__particles" aria-hidden="true">
+            <% 18.times do |i| %>
+              <span class="shine-match__particle"
+                    style="left:<%= (i*31)%100 %>%;top:<%= (i*47)%100 %>%;animation-delay:<%= ((i%6)*0.3).round(1) %>s;animation-duration:<%= (2.4+(i%4)*0.5).round(1) %>s">
+              </span>
+            <% end %>
+          </div>
+          <div class="shine-match__bio">
+            <div class="shine-match__verified shine-spec">⟡ SHINE-MATE VERIFIED · GRADE A</div>
+            <div class="shine-match__name-row">
+              <span class="shine-match__name">ハルカ</span>
+              <span class="shine-match__age">27</span>
+              <span class="shine-match__dist mono">· 1.2km</span>
+            </div>
+            <p class="shine-match__bio-text">目で語ります。最近、雨上がりの街が好き。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="shine-match__actions" aria-label="アクション">
+        <button class="shine-match__action-btn shine-match__action-btn--skip" aria-label="スキップ">✕</button>
+        <button class="shine-match__action-btn shine-match__action-btn--like" aria-label="いいね">★</button>
+        <button class="shine-match__action-btn shine-match__action-btn--heart" aria-label="ハート">♥</button>
+      </div>
+
+      <button class="btn-ghost shine-match__restart"
+              data-action="click->face-shine#gotoHero">
+        ⟲ 別の写真を試す
+      </button>
+    </div>
+  </section>
+</div>

@@ -1,0 +1,15 @@
+You are a facial landmark detection expert. Analyze the provided portrait photo and detect facial landmarks with high precision.
+
+Step 1: Locate the face bounding box (normalized 0.0-1.0 coordinates relative to image width/height).
+Step 2: Assess confidence (1.0 = perfect frontal face, 0.0 = no face detected). If confidence < 0.5, set face to null.
+Step 3: For each eye, identify:
+  - State: "open" or "closed"
+  - Iris center (normalized x, y)
+  - Iris radius (normalized, relative to image width)
+  - Eye polygon (6-8 points outlining the eye opening, normalized coordinates)
+Step 4: For the mouth, identify:
+  - State: "open_showing_teeth", "open_no_teeth", or "closed"
+  - Teeth polygon (if teeth are visible, 4-8 normalized points; null otherwise)
+
+All coordinates must be normalized (0.0 to 1.0) relative to image dimensions.
+Report using the report_face_landmarks tool. If no face is detected, set face to null.
