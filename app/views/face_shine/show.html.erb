@@ -248,13 +248,23 @@
         </svg>
       </button>
       <span class="shine-spec shine-spec--mute">03 / 03 · RESULT</span>
-      <span class="shine-diamond" aria-hidden="true"></span>
+      <button class="shine-result__nav-download"
+              data-action="click->face-shine#download"
+              data-face-shine-target="downloadButton"
+              aria-label="加工後の写真をダウンロード"
+              title="ダウンロード">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+      </button>
     </div>
 
     <div class="shine-result__body">
       <div class="shine-result__eyebrow">
         <span class="shine-diamond" aria-hidden="true"></span>
-        SHINE INDEX · + 38.4 PT
+        SHINE INDEX · CALIBRATED
       </div>
       <h2 class="shine-result__headline">
         発光、完了。<br>
@@ -316,13 +326,6 @@
            data-action="intensity-selector:change->face-shine#onIntensityChange"
            role="group"
            aria-label="輝き強度">
-        <button class="shine-result__intensity-btn"
-                data-intensity-selector-target="option"
-                data-intensity="subtle"
-                data-action="click->intensity-selector#select"
-                aria-pressed="false">
-          控えめ
-        </button>
         <button class="shine-result__intensity-btn is-active"
                 data-intensity-selector-target="option"
                 data-intensity="standard"
@@ -335,24 +338,20 @@
                 data-intensity="sparkle"
                 data-action="click->intensity-selector#select"
                 aria-pressed="false">
-          キラキラ ✦
+          キラキラ
+        </button>
+        <button class="shine-result__intensity-btn"
+                data-intensity-selector-target="option"
+                data-intensity="overdo"
+                data-action="click->intensity-selector#select"
+                aria-pressed="false">
+          やりすぎる
         </button>
       </div>
 
       <button class="btn-gold shine-result__cta"
               data-action="click->face-shine#gotoVerdict">
         AI に紹介文を書いてもらう →
-      </button>
-
-      <button class="shine-result__download"
-              data-action="click->face-shine#download"
-              data-face-shine-target="downloadButton">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-          <polyline points="7 10 12 15 17 10" />
-          <line x1="12" y1="15" x2="12" y2="3" />
-        </svg>
-        ダウンロード
       </button>
     </div>
   </section>
@@ -377,7 +376,7 @@
           AI が考えたあなたの紹介文
         </p>
         <h1 class="shine-verdict__title">マッチングアプリで、<br>そのまま使える 1 文。</h1>
-        <p class="shine-verdict__lede">写真の雰囲気から、Claude があなた自身の言葉として書き起こしました。気に入ったらコピーしてどうぞ。</p>
+        <p class="shine-verdict__lede">写真の雰囲気から、Claude があなたを主語に書きました。気に入ったら、そのままコピーして使えます。</p>
       </header>
 
       <div class="shine-verdict__intro-card">
@@ -427,7 +426,7 @@
         数字に宿る。
       </h2>
       <p class="shine-match__lede">
-        いまの発光量を現実の振る舞いに換算すると、<br>
+        いまの輝きを、現実の数字に置き換えると、<br>
         おそらく、こう映ります。
       </p>
 
