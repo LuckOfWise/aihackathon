@@ -112,6 +112,38 @@
   font-size: 12px;
 }
 
+.shine-hero__steps {
+  list-style: none;
+  margin: 0;
+  padding: 14px 0 0;
+  border-top: 0.5px solid var(--shine-line);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.shine-hero__step {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+
+.shine-hero__step-num {
+  font-family: var(--shine-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--shine-gold);
+  flex-shrink: 0;
+}
+
+.shine-hero__step-label {
+  font-family: var(--shine-serif-jp);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--shine-bone-dim);
+  line-height: 1.5;
+}
+
 .shine-hero__meta {
   display: flex;
   justify-content: space-between;
