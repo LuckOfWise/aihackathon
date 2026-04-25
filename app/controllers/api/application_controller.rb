@@ -22,16 +22,4 @@ class Api::ApplicationController < ApplicationController
     "data:#{uploaded_file.content_type};base64,#{encoded}"
   end
 
-  def extract_tool_input(response)
-    content = response.message.content
-    return nil unless content.is_a?(Array)
-
-    tool_block = content.find { |block| block.is_a?(Hash) && block[:type] == 'tool_use' }
-    return nil unless tool_block
-
-    input = tool_block[:input]
-    return nil unless input.is_a?(Hash)
-
-    input.deep_symbolize_keys
-  end
 end

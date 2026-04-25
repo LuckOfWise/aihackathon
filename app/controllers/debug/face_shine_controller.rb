@@ -25,12 +25,9 @@ class Debug::FaceShineController < ApplicationController
     encoded = Base64.strict_encode64(uploaded_file.read)
     @preview_data_url = "data:#{uploaded_file.content_type};base64,#{encoded}"
 
-    response = FaceLandmarkAgent
-               .with(image: @preview_data_url)
-               .detect
-               .generate_now
-
-    @landmarks = extract_tool_input(response)
+    @landmarks = ApplicationAgent.capture_tool_result do
+      FaceLandmarkAgent.with(image: @preview_data_url).detect.generate_now
+    end
     render :show
   rescue StandardError => e
     @error = "解析エラー: #{e.message}"
@@ -41,18 +38,5 @@ class Debug::FaceShineController < ApplicationController
 
   def require_development
     render plain: 'Not available in this environment', status: :not_found unless Rails.env.development?
-  end
-
-  def extract_tool_input(response)
-    content = response.message.content
-    return nil unless content.is_a?(Array)
-
-    tool_block = content.find { |block| block.is_a?(Hash) && block[:type] == 'tool_use' }
-    return nil unless tool_block
-
-    input = tool_block[:input]
-    return nil unless input.is_a?(Hash)
-
-    input.deep_symbolize_keys
   end
 end

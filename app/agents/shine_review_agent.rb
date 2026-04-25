@@ -67,4 +67,12 @@ class ShineReviewAgent < ApplicationAgent
       tool_choice: { type: 'tool', name: 'report_quality_validation' }
     )
   end
+
+  def report_shine_score(**input)
+    store_tool_result(input)
+  end
+
+  def report_quality_validation(**input)
+    store_tool_result(input)
+  end
 end

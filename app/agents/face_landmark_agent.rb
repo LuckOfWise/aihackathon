@@ -127,4 +127,12 @@ class FaceLandmarkAgent < ApplicationAgent
     @failure_reason = params[:failure_reason]
     prompt(image: @image)
   end
+
+  def report_face_landmarks(**input)
+    store_tool_result(input)
+  end
+
+  def report_recommended_intensity(**input)
+    store_tool_result(input)
+  end
 end

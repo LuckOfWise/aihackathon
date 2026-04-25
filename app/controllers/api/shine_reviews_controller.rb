@@ -69,19 +69,21 @@ class Api::ShineReviewsController < Api::ApplicationController
   end
 
   def fetch_score(original_data_url, shined_data_url)
-    response = ShineReviewAgent
-               .with(original_image: original_data_url, shined_image: shined_data_url)
-               .score
-               .generate_now
-    extract_tool_input(response)
+    ApplicationAgent.capture_tool_result do
+      ShineReviewAgent
+        .with(original_image: original_data_url, shined_image: shined_data_url)
+        .score
+        .generate_now
+    end
   rescue StandardError => e
     Rails.logger.error("fetch_score error: #{e.message}")
     nil
   end
 
   def fetch_validation(shined_data_url)
-    response = ShineReviewAgent.with(shined_image: shined_data_url).validate_quality.generate_now
-    extract_tool_input(response)
+    ApplicationAgent.capture_tool_result do
+      ShineReviewAgent.with(shined_image: shined_data_url).validate_quality.generate_now
+    end
   rescue StandardError => e
     Rails.logger.error("fetch_validation error: #{e.message}")
     nil

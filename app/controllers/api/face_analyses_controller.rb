@@ -41,13 +41,15 @@ class Api::FaceAnalysesController < Api::ApplicationController
 
   def run_parallel_analysis(data_url)
     landmarks_thread = Thread.new do
-      response = FaceLandmarkAgent.with(image: data_url).detect.generate_now
-      extract_tool_input(response) || {}
+      ApplicationAgent.capture_tool_result do
+        FaceLandmarkAgent.with(image: data_url).detect.generate_now
+      end || {}
     end
 
     intensity_thread = Thread.new do
-      response = FaceLandmarkAgent.with(image: data_url).recommend_intensity.generate_now
-      extract_tool_input(response) || { intensity: 'standard', reason: '標準設定を使用します' }
+      ApplicationAgent.capture_tool_result do
+        FaceLandmarkAgent.with(image: data_url).recommend_intensity.generate_now
+      end || { intensity: 'standard', reason: '標準設定を使用します' }
     end
 
     [landmarks_thread.value, intensity_thread.value]
