@@ -16,28 +16,28 @@ interface EffectParams {
 
 const EFFECT_PARAMS: Record<Intensity, EffectParams> = {
   subtle: {
-    catchlightOpacity: 0.7,
-    catchlightRadiusFactor: 0.55,
-    eyeFilter: 'brightness(1.18) saturate(1.35) contrast(1.10)',
-    teethFilter: 'brightness(1.10) saturate(0.78) contrast(1.04)',
-    rayOpacity: 0.35,
-    rayLengthFactor: 1.6,
-    haloOpacity: 0.20,
-    haloRadiusFactor: 1.6,
-    teethHighlightOpacity: 0.20,
+    catchlightOpacity: 0.35,
+    catchlightRadiusFactor: 0.32,
+    eyeFilter: 'brightness(1.04) saturate(1.08) contrast(1.02)',
+    teethFilter: 'brightness(1.06) saturate(0.85) contrast(1.02)',
+    rayOpacity: 0,
+    rayLengthFactor: 0,
+    haloOpacity: 0,
+    haloRadiusFactor: 0,
+    teethHighlightOpacity: 0.10,
     sparkle: false,
     sparkleCount: 0,
   },
   standard: {
-    catchlightOpacity: 0.95,
-    catchlightRadiusFactor: 0.70,
-    eyeFilter: 'brightness(1.32) saturate(1.65) contrast(1.18)',
-    teethFilter: 'brightness(1.18) saturate(0.58) contrast(1.06)',
-    rayOpacity: 0.75,
-    rayLengthFactor: 2.6,
-    haloOpacity: 0.45,
-    haloRadiusFactor: 2.0,
-    teethHighlightOpacity: 0.40,
+    catchlightOpacity: 0.55,
+    catchlightRadiusFactor: 0.42,
+    eyeFilter: 'brightness(1.08) saturate(1.18) contrast(1.05)',
+    teethFilter: 'brightness(1.10) saturate(0.72) contrast(1.03)',
+    rayOpacity: 0,
+    rayLengthFactor: 0,
+    haloOpacity: 0,
+    haloRadiusFactor: 0,
+    teethHighlightOpacity: 0.18,
     sparkle: false,
     sparkleCount: 0,
   },
@@ -208,6 +208,7 @@ function drawStarRays(
   opacity: number,
   lengthFactor: number,
 ): void {
+  if (opacity <= 0 || lengthFactor <= 0) return
   const long = irisRadius * lengthFactor
   const short = irisRadius * 0.22
   ctx.save()
@@ -256,6 +257,7 @@ function drawEyeHalo(
   opacity: number,
   radiusFactor: number,
 ): void {
+  if (opacity <= 0 || radiusFactor <= 0) return
   const r = irisRadius * radiusFactor
   ctx.save()
   ctx.globalCompositeOperation = 'screen'
@@ -335,10 +337,12 @@ function processEye(
   // 虹彩の色補正（元のテクスチャを保ちつつ brightness/saturate/contrast）
   applyFilterToRegion(ctx, polygon, params.eyeFilter)
 
-  // 虹彩本体を内側から発光 + キャッチライトを clip 内で合成
+  // キャッチライトを clip 内で合成。iris glow は sparkle 時のみ。
   ctx.save()
   clipToPolygon(ctx, polygon)
-  drawIrisGlow(ctx, cx, cy, irisRadius)
+  if (params.sparkle) {
+    drawIrisGlow(ctx, cx, cy, irisRadius)
+  }
   drawCatchlight(ctx, cx, cy, irisRadius, params.catchlightOpacity, params.catchlightRadiusFactor)
   ctx.restore()
 
