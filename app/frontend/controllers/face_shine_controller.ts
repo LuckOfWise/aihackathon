@@ -127,6 +127,7 @@ export default class extends Controller {
   private cameraStream: MediaStream | null = null
   private metricRafs: number[] = []
   private currentMetrics = { eye: 0, enamel: 0, attract: 0 }
+  private serverScore: number | null = null
 
   connect(): void {
     this.buildMeshSvg()
@@ -223,6 +224,10 @@ export default class extends Controller {
       cancelAnimationFrame(this.analysisRaf)
       this.analysisRaf = null
     }
+    for (const id of this.metricRafs) cancelAnimationFrame(id)
+    this.metricRafs = []
+    this.currentMetrics = { eye: 0, enamel: 0, attract: 0 }
+    this.serverScore = null
     if (this.hasFileInputTarget) {
       this.fileInputTarget.value = ''
     }
@@ -671,10 +676,13 @@ export default class extends Controller {
     this.beforeImgTarget.src = this.originalDataUrl
     this.showStage('result')
 
-    // intensity 切替時は flash や review を再実行しない（"再読み込み感" の解消）。
+    // メトリクスは intensity が変わるたびにアニメで再計算する(動的に変わる)。
+    this.updateMetricsAnimated(intensity)
+
+    // intensity 切替時は flash や review(SSE)を再実行しない("再読み込み感" の解消)。
     if (isInitial) {
       this.triggerFlash()
-      this.updateMetricsAnimated(intensity)
+      this.serverScore = null
       await this.review(resultCanvas, intensity, retryCount)
     }
   }
@@ -742,8 +750,9 @@ export default class extends Controller {
             this.commentDisplayTarget.textContent = commentText
           },
           score: ({ score }) => {
+            this.serverScore = score
             this.scoreDisplayTarget.textContent = `SHINE INDEX · ${score} / 100`
-            const target = score * 0.38
+            const target = this.computeAttract(this.intensityValue)
             this.animateMetric(this.metricAttractTarget, this.currentMetrics.attract, target, (v) => `+${v.toFixed(1)}`, 700)
             this.currentMetrics.attract = target
           },
@@ -780,7 +789,6 @@ export default class extends Controller {
 
     const eyeBaseByIntensity: Record<Intensity, number> = { standard: 10, sparkle: 22, overdo: 38 }
     const enamelBaseByIntensity: Record<Intensity, number> = { standard: 14, sparkle: 26, overdo: 42 }
-    const attractEstByIntensity: Record<Intensity, number> = { standard: 18, sparkle: 28, overdo: 36 }
 
     const leftOpen = this.faceData.eyes.left.state === 'open'
     const rightOpen = this.faceData.eyes.right.state === 'open'
@@ -803,7 +811,7 @@ export default class extends Controller {
       ? Math.max(3, Math.round(enamelBaseByIntensity[intensity] + teethBoost + enamelJitter))
       : 0
 
-    const attractEst = attractEstByIntensity[intensity] + eyeBoost * 0.2 + teethBoost * 0.15
+    const attract = this.computeAttract(intensity, eyeBoost, teethBoost)
 
     this.animateMetric(
       this.metricEyeTarget,
@@ -822,12 +830,23 @@ export default class extends Controller {
     this.animateMetric(
       this.metricAttractTarget,
       this.currentMetrics.attract,
-      attractEst,
+      attract,
       (v) => `+${v.toFixed(1)}`,
       650,
     )
 
-    this.currentMetrics = { eye: eyeDelta, enamel: enamelDelta, attract: attractEst }
+    this.currentMetrics = { eye: eyeDelta, enamel: enamelDelta, attract }
+  }
+
+  // server score が来ていれば使い、まだなら intensity 別の仮値を返す。
+  // intensity 別 multiplier で intensity 切替時にも attract を動かす。
+  private computeAttract(intensity: Intensity, eyeBoost = 0, teethBoost = 0): number {
+    const intensityMultiplier: Record<Intensity, number> = { standard: 1.0, sparkle: 1.18, overdo: 1.34 }
+    if (this.serverScore !== null) {
+      return this.serverScore * 0.38 * intensityMultiplier[intensity]
+    }
+    const fallback: Record<Intensity, number> = { standard: 18, sparkle: 28, overdo: 36 }
+    return fallback[intensity] + eyeBoost * 0.2 + teethBoost * 0.15
   }
 
   // 0..1 の決定的擬似乱数。intensity と key で値が変わり、同じ条件では再現する。
