@@ -51,7 +51,7 @@ const MESH_EDGES: [number, number][] = [
 ]
 
 const MAX_QUALITY_RETRIES = 2
-const ANALYSIS_DURATION_MS = 8000
+const ANALYSIS_DURATION_MS = 12000
 
 export default class extends Controller {
   static targets = [
@@ -82,6 +82,7 @@ export default class extends Controller {
   declare stageMatchTarget: HTMLElement
   declare flashOverlayTarget: HTMLElement
   declare fileInputTarget: HTMLInputElement
+  declare hasFileInputTarget: boolean
   declare cameraOverlayTarget: HTMLElement
   declare cameraVideoTarget: HTMLVideoElement
   declare hasCameraVideoTarget: boolean
@@ -118,6 +119,7 @@ export default class extends Controller {
   private originalDataUrl: string | null = null
   private faceData: FaceData | null = null
   private composedCanvas: HTMLCanvasElement | null = null
+  private enhancedImageUrl: string | null = null
   private abortController: AbortController | null = null
   private analysisRaf: number | null = null
   private qualityRetryCount = 0
@@ -139,8 +141,8 @@ export default class extends Controller {
     this.stopCameraStream()
   }
 
-  gotoHero(): void { this.showStage('hero') }
-  gotoUpload(): void { this.showStage('upload') }
+  gotoHero(): void { this.resetUploadState(); this.showStage('hero') }
+  gotoUpload(): void { this.resetUploadState(); this.showStage('upload') }
   gotoAnalyzing(): void { this.showStage('analyzing') }
   gotoResult(): void { this.triggerFlash(); this.showStage('result') }
   gotoVerdict(): void { this.showStage('verdict') }
@@ -208,6 +210,22 @@ export default class extends Controller {
     }
   }
 
+  // 戻る系遷移時に呼ぶ。前回選んだファイルの value を消さないと
+  // 同じファイルを再選択しても change イベントが発火しない。
+  // 進行中の解析(animation / fetch)も中断してから新規受け付けに備える。
+  private resetUploadState(): void {
+    this.abortController?.abort()
+    this.abortController = null
+    if (this.analysisRaf !== null) {
+      cancelAnimationFrame(this.analysisRaf)
+      this.analysisRaf = null
+    }
+    if (this.hasFileInputTarget) {
+      this.fileInputTarget.value = ''
+    }
+    this.clearError()
+  }
+
   private async processImageFile(file: File): Promise<void> {
     this.clearError()
     this.qualityRetryCount = 0
@@ -226,9 +244,28 @@ export default class extends Controller {
   async onIntensityChange(event: Event): Promise<void> {
     const detail = (event as CustomEvent<{ intensity: Intensity }>).detail
     this.intensityValue = detail.intensity
-    if (this.faceData && this.originalDataUrl) {
-      await this.recompose()
+    if (!this.faceData || !this.originalDataUrl) return
+
+    // sparkle に切り替わって、まだ Replicate 結果が無いなら生成しに行く。
+    // analyzing 画面を再利用してアニメーションで待ち時間を埋める。
+    if (this.intensityValue === 'sparkle' && !this.enhancedImageUrl) {
+      this.showStage('analyzing')
+      this.startAnalysisAnimation()
+      await this.fetchEnhancedImage()
+      await this.waitForAnimationEnd()
     }
+
+    await this.recompose()
+  }
+
+  private async waitForAnimationEnd(): Promise<void> {
+    return new Promise((resolve) => {
+      const check = (): void => {
+        if (this.analysisRaf === null) resolve()
+        else setTimeout(check, 200)
+      }
+      setTimeout(check, 200)
+    })
   }
 
   async download(): Promise<void> {
@@ -560,8 +597,36 @@ export default class extends Controller {
     }
 
     this.faceData = face
+    this.enhancedImageUrl = null
+
+    // sparkle のときだけ Replicate を叩く。subtle/standard は従来の Canvas filter のまま。
+    if (this.intensityValue === 'sparkle') {
+      await this.fetchEnhancedImage()
+    }
 
     await this.waitForAnimationAndCompose()
+  }
+
+  private async fetchEnhancedImage(): Promise<void> {
+    if (!this.originalDataUrl) return
+    try {
+      const blob = dataUrlToBlob(this.originalDataUrl)
+      const formData = new FormData()
+      formData.append('file', blob, 'image.jpg')
+
+      const response = await fetch('/api/enhancements', { method: 'POST', body: formData })
+      if (!response.ok) {
+        const errorBody = (await response.json().catch(() => ({}))) as { message?: string }
+        console.warn('Enhancement API failed, falling back to local compose:', errorBody)
+        this.enhancedImageUrl = null
+        return
+      }
+      const data = (await response.json()) as { enhanced_image_url: string }
+      this.enhancedImageUrl = data.enhanced_image_url
+    } catch (err) {
+      console.warn('Enhancement API error, falling back to local compose:', err)
+      this.enhancedImageUrl = null
+    }
   }
 
   private async waitForAnimationAndCompose(): Promise<void> {
@@ -582,15 +647,9 @@ export default class extends Controller {
   private async compose(intensity: Intensity, retryCount = 0): Promise<void> {
     if (!this.originalDataUrl || !this.faceData) return
 
-    const img = new Image()
-    img.src = this.originalDataUrl
-    await new Promise<void>((resolve, reject) => {
-      img.onload = () => resolve()
-      img.onerror = () => reject(new Error('画像の読み込みに失敗しました'))
-    })
+    const resultCanvas = await this.buildResultCanvas(intensity)
+    if (!resultCanvas) return
 
-    const sourceCanvas = imageToCanvas(img)
-    const resultCanvas = composeFaceEffect(sourceCanvas, this.faceData, intensity)
     this.composedCanvas = resultCanvas
 
     const ctx = this.resultCanvasTarget.getContext('2d')
@@ -606,6 +665,34 @@ export default class extends Controller {
     this.showStage('result')
 
     await this.review(resultCanvas, intensity, retryCount)
+  }
+
+  private async buildResultCanvas(intensity: Intensity): Promise<HTMLCanvasElement | null> {
+    // sparkle のときだけ Replicate 生成画像を使う。subtle/standard は Canvas filter のまま。
+    // sparkle でも Replicate に失敗していれば Canvas filter にフォールバック。
+    if (intensity === 'sparkle' && this.enhancedImageUrl) {
+      try {
+        const img = await this.loadImage(this.enhancedImageUrl, /* crossOrigin */ true)
+        return imageToCanvas(img)
+      } catch (err) {
+        console.warn('Enhanced image load failed, falling back to local compose:', err)
+      }
+    }
+
+    if (!this.originalDataUrl || !this.faceData) return null
+    const img = await this.loadImage(this.originalDataUrl, false)
+    const sourceCanvas = imageToCanvas(img)
+    return composeFaceEffect(sourceCanvas, this.faceData, intensity)
+  }
+
+  private loadImage(src: string, crossOrigin: boolean): Promise<HTMLImageElement> {
+    return new Promise((resolve, reject) => {
+      const img = new Image()
+      if (crossOrigin) img.crossOrigin = 'anonymous'
+      img.onload = () => resolve(img)
+      img.onerror = () => reject(new Error('画像の読み込みに失敗しました'))
+      img.src = src
+    })
   }
 
   private async review(
