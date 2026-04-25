@@ -9,6 +9,6 @@ class Ui::TextAreaInputComponent < ApplicationComponent
 
   def call
     content_tag(:textarea, @value.to_s, name: @name, rows: @rows, class: 'input',
-                placeholder: @placeholder, required: @required)
+                                        placeholder: @placeholder, required: @required)
   end
 end

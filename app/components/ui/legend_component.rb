@@ -5,12 +5,12 @@ class Ui::LegendComponent < ApplicationComponent
 
   def call
     content_tag(:div, class: 'legend') do
-      @items.map do |item|
+      @items.sum do |item|
         content_tag(:span, class: 'legend__item') do
-          concat(render(Ui::DotComponent.new(variant: item[:variant] || :default)))
+          concat(render(Ui::DotComponent.new(variant: item.fetch(:variant, :default))))
           concat(item[:label])
         end
-      end.reduce(:+)
+      end
     end
   end
 end

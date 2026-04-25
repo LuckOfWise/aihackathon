@@ -12,7 +12,7 @@ class Ui::CircularProgressComponent < ApplicationComponent
   end
 
   def call
-    svg_content = <<~SVG.html_safe
+    svg_content = <<~SVG.html_safe # rubocop:disable Rails/OutputSafety
       <svg viewBox="0 0 44 44" aria-hidden="true">
         <circle class="circular-progress__track" cx="22" cy="22" r="#{RADIUS}"></circle>
         <circle class="circular-progress__fill" cx="22" cy="22" r="#{RADIUS}"
@@ -22,7 +22,7 @@ class Ui::CircularProgressComponent < ApplicationComponent
     SVG
 
     content_tag(:div, class: 'circular-progress', role: 'progressbar',
-                'aria-valuenow': @value, 'aria-valuemin': 0, 'aria-valuemax': 100) do
+                      'aria-valuenow': @value, 'aria-valuemin': 0, 'aria-valuemax': 100) do
       concat(svg_content)
       concat(content_tag(:span, @label || "#{@value}%", class: 'circular-progress__label'))
     end

@@ -4,6 +4,6 @@ class Ui::MarkdownViewComponent < ApplicationComponent
   end
 
   def call
-    content_tag(:div, simple_format(@text), class: 'markdown-view')
+    content_tag(:div, simple_format(sanitize(@text)), class: 'markdown-view') # rubocop:disable Sgcop/SimpleFormat
   end
 end

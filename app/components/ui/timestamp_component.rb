@@ -11,7 +11,7 @@ class Ui::TimestampComponent < ApplicationComponent
       display_text,
       class: 'timestamp',
       datetime: @time.iso8601,
-      title: @absolute ? I18n.l(@time, format: :long) : nil,
+      title: @absolute ? I18n.l(@time, format: :long) : nil
     )
   end
 

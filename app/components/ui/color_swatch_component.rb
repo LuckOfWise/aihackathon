@@ -11,7 +11,7 @@ class Ui::ColorSwatchComponent < ApplicationComponent
       class: ['color-swatch', ('is-active' if @active)].compact.join(' '),
       style: "background: #{@color};",
       title: @label,
-      'aria-label': @label,
+      'aria-label': @label
     )
   end
 end

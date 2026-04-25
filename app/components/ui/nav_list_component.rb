@@ -10,7 +10,7 @@ class Ui::NavListComponent < ApplicationComponent
         safe_join(@items.map do |item|
           active = item[:id].to_s == @current.to_s
           content_tag(:li, class: ['nav-list__item', ('is-active' if active)].compact.join(' ')) do
-            link_to(item[:label], item[:href] || '#', class: 'nav-list__item-link')
+            link_to(item[:label], item.fetch(:href, '#'), class: 'nav-list__item-link')
           end
         end)
       end
