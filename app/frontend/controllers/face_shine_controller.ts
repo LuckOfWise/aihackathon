@@ -66,6 +66,7 @@ export default class extends Controller {
     'errorMessage',
     'metricEye', 'metricEnamel', 'metricAttract',
     'downloadButton',
+    'copyButton', 'copyLabel',
   ]
 
   static values = {
@@ -107,6 +108,9 @@ export default class extends Controller {
   declare metricEnamelTarget: HTMLElement
   declare metricAttractTarget: HTMLElement
   declare downloadButtonTarget: HTMLButtonElement
+  declare copyButtonTarget: HTMLButtonElement
+  declare copyLabelTarget: HTMLElement
+  declare hasCopyButtonTarget: boolean
 
   declare stageValue: Stage
   declare intensityValue: Intensity
@@ -236,6 +240,25 @@ export default class extends Controller {
     a.download = 'shine-mate-photo.jpg'
     a.click()
     URL.revokeObjectURL(url)
+  }
+
+  async copyComment(): Promise<void> {
+    const text = this.commentDisplayTarget.textContent?.trim()
+    if (!text || !this.hasCopyButtonTarget) return
+
+    try {
+      await navigator.clipboard.writeText(text)
+    } catch {
+      return
+    }
+
+    this.copyButtonTarget.classList.add('is-copied')
+    this.copyLabelTarget.textContent = 'コピーしました'
+    setTimeout(() => {
+      if (!this.hasCopyButtonTarget) return
+      this.copyButtonTarget.classList.remove('is-copied')
+      this.copyLabelTarget.textContent = 'コピー'
+    }, 1800)
   }
 
   private showStage(stage: Stage): void {

@@ -341,7 +341,7 @@
 
       <button class="btn-gold shine-result__cta"
               data-action="click->face-shine#gotoVerdict">
-        AIによる魅力鑑定書を読む →
+        AI に紹介文を書いてもらう →
       </button>
 
       <button class="shine-result__download"
@@ -366,58 +366,40 @@
           <path d="M8 1L1 7l7 6" stroke="currentColor" stroke-width="1.2" />
         </svg>
       </button>
-      <span class="shine-spec shine-spec--mute">· · VERDICT BY CLAUDE</span>
+      <span class="shine-spec shine-spec--mute">PROFILE INTRO</span>
       <span class="shine-diamond" aria-hidden="true"></span>
     </div>
 
     <div class="shine-verdict__body">
-      <div class="shine-verdict__masthead">
-        <span>VOL. ИХ</span>
-        <span>SHINE-MATE QUARTERLY</span>
-        <span>26 / SS</span>
-      </div>
+      <header class="shine-verdict__heading">
+        <p class="shine-verdict__eyebrow shine-spec shine-spec--gold">
+          <span class="shine-diamond" aria-hidden="true"></span>
+          AI が考えたあなたの紹介文
+        </p>
+        <h1 class="shine-verdict__title">マッチングアプリで、<br>そのまま使える 1 文。</h1>
+        <p class="shine-verdict__lede">写真の雰囲気から、Claude があなた自身の言葉として書き起こしました。気に入ったらコピーしてどうぞ。</p>
+      </header>
 
-      <div class="shine-verdict__headline-group">
-        <p class="shine-verdict__on-matter">— On the matter of —</p>
-        <h1 class="shine-verdict__headline" aria-label="Quiet Radiance">
-          <em>Quiet</em><br>
-          Radiance,
-        </h1>
-        <p class="shine-verdict__jp-headline">静カナル、爆発。</p>
-      </div>
-
-      <div class="shine-verdict__critique">
-        <span class="shine-verdict__dropcap" aria-hidden="true">こ</span>
-        <span class="shine-verdict__critique-body" data-face-shine-target="commentDisplay">
-          のひと、目で語る人だ。瞳の奥に小さな星が一つ、ちゃんと棲んでいる。
-          歯のラインは雨上がりのような清潔さで、笑った瞬間、街全体の彩度が0.3上がる。<br><br>
-          結論：<em class="shine-verdict__key-phrase">A diamond, mid-cut.</em> 磨けば、磨くほど、化ける。
-        </span>
-      </div>
-
-      <div class="shine-verdict__signature">
-        <div>
-          <div class="shine-spec shine-spec--mute">SIGNED</div>
-          <div class="shine-verdict__claude-sig">Claude, c.</div>
-          <div class="shine-verdict__model mono">MODEL: claude-haiku-4-5</div>
-        </div>
-        <div class="shine-verdict__seal" aria-label="SHINE-MATE 公式シール">
-          <span class="shine-verdict__seal-text">SM</span>
-          <span class="shine-verdict__seal-ring" aria-hidden="true"></span>
-        </div>
-      </div>
-
-      <div class="shine-verdict__tags" role="list">
-        <% ['#QuietRadiance','#MidCutDiamond','#SmilePotential','#内なる発光','#瞳力'].each do |tag| %>
-          <span class="shine-verdict__tag mono" role="listitem"><%= tag %></span>
-        <% end %>
+      <div class="shine-verdict__intro-card">
+        <p class="shine-verdict__intro" data-face-shine-target="commentDisplay" aria-live="polite"></p>
+        <button type="button"
+                class="shine-verdict__copy"
+                data-action="click->face-shine#copyComment"
+                data-face-shine-target="copyButton"
+                aria-label="紹介文をコピー">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          <span data-face-shine-target="copyLabel">コピー</span>
+        </button>
       </div>
 
       <div class="shine-verdict__score shine-spec shine-spec--mute" data-face-shine-target="scoreDisplay"></div>
 
       <button class="btn-gold shine-verdict__cta"
               data-action="click->face-shine#gotoMatch">
-        この輝きの、効果を予測する →
+        マッチング画面で見る →
       </button>
     </div>
   </section>
