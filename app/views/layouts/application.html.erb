@@ -24,32 +24,6 @@
   </head>
 
   <body>
-    <div class="layout">
-      <header class="layout__header">
-        <%= render Ui::NavbarComponent.new do |c| %>
-          <% c.with_brand do %>
-            <%= link_to root_path, class: 'navbar__brand' do %>
-              <%= render Ui::IconComponent.new(name: 'sparkles', size: 18) %>
-              Aihackathon
-            <% end %>
-          <% end %>
-        <% end %>
-      </header>
-
-      <main class="layout__main">
-        <% if notice.present? %>
-          <%= render Ui::AlertComponent.new(variant: :notice) { notice } %>
-        <% end %>
-        <% if alert.present? %>
-          <%= render Ui::AlertComponent.new(variant: :alert) { alert } %>
-        <% end %>
-
-        <%= yield %>
-      </main>
-
-      <footer class="layout__footer">
-        Aihackathon · Rails 8 + Hotwire + ActiveAgent
-      </footer>
-    </div>
+    <%= yield %>
   </body>
 </html>
