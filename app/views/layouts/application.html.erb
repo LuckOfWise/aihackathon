@@ -1,19 +1,43 @@
 <!DOCTYPE html>
 <html lang="ja">
   <head>
-    <title><%= content_for(:title) || "Aihackathon" %></title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <% page_title = content_for?(:title) ? content_for(:title) : "SHINE-MATE — 写真の雰囲気から、紹介文を書き起こす AI" %>
+    <% page_description = "AI が写真の雰囲気から、マッチングアプリで使えるあなた自身の自己紹介文を書き起こします。" %>
+    <title><%= page_title %></title>
+
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+    <meta name="description" content="<%= page_description %>">
+    <meta name="theme-color" content="#0e0a02">
+    <meta name="color-scheme" content="dark">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="Aihackathon">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SHINE-MATE">
+    <meta name="application-name" content="SHINE-MATE">
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="SHINE-MATE">
+    <meta property="og:title" content="<%= page_title %>">
+    <meta property="og:description" content="<%= page_description %>">
+    <meta property="og:image" content="<%= request.base_url %>/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:locale" content="ja_JP">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="<%= page_title %>">
+    <meta name="twitter:description" content="<%= page_description %>">
+    <meta name="twitter:image" content="<%= request.base_url %>/og-image.png">
+
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
     <%= yield :head %>
 
-    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/icon.png">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.webmanifest">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">

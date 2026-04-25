@@ -1,0 +1,17 @@
+{
+  "name": "SHINE-MATE",
+  "short_name": "SHINE-MATE",
+  "description": "AI が写真の雰囲気から、マッチングアプリで使える自己紹介文を書き起こします。",
+  "start_url": "/face_shine",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#050507",
+  "theme_color": "#0e0a02",
+  "lang": "ja",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
