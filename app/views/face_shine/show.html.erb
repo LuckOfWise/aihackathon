@@ -129,6 +129,22 @@
         </div>
       </div>
 
+      <label class="shine-upload__camera-link" for="shine-camera-input">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
+          <circle cx="12" cy="13" r="3"/>
+        </svg>
+        <span>その場で撮影する</span>
+        <input
+          id="shine-camera-input"
+          type="file"
+          accept="image/*"
+          capture="user"
+          class="shine-upload__file-input"
+          data-action="change->face-shine#onFileChange"
+          aria-label="カメラで撮影">
+      </label>
+
       <p class="shine-upload__error" data-face-shine-target="errorMessage" hidden role="alert"></p>
     </div>
   </section>
@@ -380,7 +396,7 @@
 
       <button class="btn-gold shine-verdict__cta"
               data-action="click->face-shine#gotoMatch">
-        マッチング画面で輝かせる →
+        この輝きの、効果を予測する →
       </button>
     </div>
   </section>
@@ -394,52 +410,67 @@
           <path d="M8 1L1 7l7 6" stroke="currentColor" stroke-width="1.2" />
         </svg>
       </button>
-      <span class="shine-spec shine-spec--mute">LIVE PREVIEW</span>
+      <span class="shine-spec shine-spec--mute">· · PROJECTED IMPACT</span>
       <span class="shine-diamond" aria-hidden="true"></span>
     </div>
 
     <div class="shine-match__body">
       <div class="shine-match__eyebrow">
         <span class="shine-diamond" aria-hidden="true"></span>
-        DEPLOYED TO YOUR DATING APP
+        FORECAST · BASED ON SHINE INDEX
       </div>
-      <h2 class="shine-match__headline">こうして、相手に届きます。</h2>
+      <h2 class="shine-match__headline">
+        磨かれた輝きは、<br>
+        数字に宿る。
+      </h2>
+      <p class="shine-match__lede">
+        いまの発光量を現実の振る舞いに換算すると、<br>
+        おそらく、こう映ります。
+      </p>
 
-      <div class="shine-match__stack" aria-label="マッチングアプリプレビュー" role="img">
-        <div class="shine-match__card shine-match__card--back2" aria-hidden="true"></div>
-        <div class="shine-match__card shine-match__card--back1" aria-hidden="true"></div>
-
-        <div class="shine-match__card shine-match__card--front">
-          <canvas class="shine-match__photo" data-face-shine-target="matchCanvas" aria-hidden="true"></canvas>
-          <div class="shine-match__shimmer-overlay" aria-hidden="true"></div>
-          <div class="shine-match__particles" aria-hidden="true">
-            <% 18.times do |i| %>
-              <span class="shine-match__particle"
-                    style="left:<%= (i*31)%100 %>%;top:<%= (i*47)%100 %>%;animation-delay:<%= ((i%6)*0.3).round(1) %>s;animation-duration:<%= (2.4+(i%4)*0.5).round(1) %>s">
-              </span>
-            <% end %>
-          </div>
-          <div class="shine-match__bio">
-            <div class="shine-match__verified shine-spec">⟡ SHINE-MATE VERIFIED · GRADE A</div>
-            <div class="shine-match__name-row">
-              <span class="shine-match__name">ハルカ</span>
-              <span class="shine-match__age">27</span>
-              <span class="shine-match__dist mono">· 1.2km</span>
-            </div>
-            <p class="shine-match__bio-text">目で語ります。最近、雨上がりの街が好き。</p>
-          </div>
+      <figure class="shine-match__figure">
+        <div class="shine-match__figure-frame">
+          <canvas class="shine-match__photo" data-face-shine-target="matchCanvas" aria-label="加工後の画像"></canvas>
+          <span class="shine-match__figure-corner shine-match__figure-corner--tl" aria-hidden="true"></span>
+          <span class="shine-match__figure-corner shine-match__figure-corner--tr" aria-hidden="true"></span>
+          <span class="shine-match__figure-corner shine-match__figure-corner--bl" aria-hidden="true"></span>
+          <span class="shine-match__figure-corner shine-match__figure-corner--br" aria-hidden="true"></span>
         </div>
-      </div>
+        <figcaption class="shine-match__figcaption shine-spec shine-spec--mute">
+          REFERENCE · INTENSITY STANDARD
+        </figcaption>
+      </figure>
 
-      <div class="shine-match__actions" aria-label="アクション">
-        <button class="shine-match__action-btn shine-match__action-btn--skip" aria-label="スキップ">✕</button>
-        <button class="shine-match__action-btn shine-match__action-btn--like" aria-label="いいね">★</button>
-        <button class="shine-match__action-btn shine-match__action-btn--heart" aria-label="ハート">♥</button>
-      </div>
+      <dl class="shine-match__specs" role="list">
+        <div class="shine-match__spec" role="listitem">
+          <dt class="shine-match__spec-key">視線滞留</dt>
+          <dd class="shine-match__spec-val">+0.42<span class="shine-match__spec-unit">sec</span></dd>
+        </div>
+        <div class="shine-match__spec" role="listitem">
+          <dt class="shine-match__spec-key">スクロール停止率</dt>
+          <dd class="shine-match__spec-val">×1.6</dd>
+        </div>
+        <div class="shine-match__spec" role="listitem">
+          <dt class="shine-match__spec-key">既読率</dt>
+          <dd class="shine-match__spec-val">+18<span class="shine-match__spec-unit">%</span></dd>
+        </div>
+        <div class="shine-match__spec" role="listitem">
+          <dt class="shine-match__spec-key">第一印象の温度</dt>
+          <dd class="shine-match__spec-val">+2.1<span class="shine-match__spec-unit">℃</span></dd>
+        </div>
+        <div class="shine-match__spec" role="listitem">
+          <dt class="shine-match__spec-key">検索結果ホバー</dt>
+          <dd class="shine-match__spec-val">×2.3</dd>
+        </div>
+      </dl>
+
+      <p class="shine-match__disclaimer">
+        ※ SHINE INDEX スコアに基づく推定値。実測値ではありません。
+      </p>
 
       <button class="btn-ghost shine-match__restart"
               data-action="click->face-shine#gotoHero">
-        ⟲ 別の写真を試す
+        別の写真を試す
       </button>
     </div>
   </section>

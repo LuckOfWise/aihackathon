@@ -153,6 +153,36 @@
   color: var(--shine-bone);
 }
 
+.shine-upload__camera-link {
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: 0.5px solid var(--shine-line-2);
+  border-radius: 999px;
+  color: var(--shine-bone-dim);
+  font-family: var(--shine-sans);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+
+  &:hover {
+    color: var(--shine-gold);
+    border-color: var(--shine-gold);
+  }
+
+  &:focus-within {
+    outline: 2px solid var(--shine-gold);
+    outline-offset: 2px;
+  }
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
 .shine-upload__error {
   color: #e87070;
   font-size: 13px;
