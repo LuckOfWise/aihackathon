@@ -1,3 +1,9 @@
+body:has(.shine-mate) {
+  background:
+    radial-gradient(ellipse 720px 900px at 50% 35%, rgba(212, 175, 55, 0.08), transparent 65%),
+    #000;
+}
+
 .shine-mate {
   position: relative;
   background: var(--shine-ink);
@@ -5,6 +11,12 @@
   font-family: var(--shine-sans);
   min-height: 100dvh;
   -webkit-font-smoothing: antialiased;
+
+  @media (min-width: 640px) {
+    max-width: 440px;
+    margin-inline: auto;
+    box-shadow: 0 0 0 0.5px var(--shine-line-2), 0 0 80px rgba(0, 0, 0, 0.55);
+  }
 }
 
 .shine-mate [hidden] {
