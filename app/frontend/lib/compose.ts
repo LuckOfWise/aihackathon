@@ -39,7 +39,7 @@ const EFFECT_PARAMS: Record<Intensity, EffectParams> = {
     haloRadiusFactor: 2.6,
     teethHighlightOpacity: 0.55,
     sparkle: true,
-    sparkleCount: 6,
+    sparkleCount: 2,
   },
   // overdo は通常 Replicate 生成画像で上書きされるため Canvas filter は使われないが、
   // Replicate 失敗時のフォールバック用に sparkle を継承した強めの値を設定。
@@ -450,9 +450,8 @@ export function composeFaceEffect(
   }
 
   if (params.sparkle) {
+    const teethSize = Math.min(w, h) * 0.025
     const seedPoints: { x: number; y: number; size: number }[] = []
-    if (leftEye) seedPoints.push({ x: leftEye.cornerX, y: leftEye.cornerY, size: leftEye.irisRadius * 0.9 })
-    if (rightEye) seedPoints.push({ x: rightEye.cornerX, y: rightEye.cornerY, size: rightEye.irisRadius * 0.9 })
     if (teethCenter) {
       // 真ん中に置くと顔の対称軸と被って目立たないので、右寄せ + 少し上
       const offsetX = Math.min(w, h) * 0.04
@@ -460,7 +459,7 @@ export function composeFaceEffect(
       seedPoints.push({
         x: teethCenter.centerX + offsetX,
         y: teethCenter.centerY + offsetY,
-        size: Math.min(w, h) * 0.025,
+        size: teethSize,
       })
     }
 
