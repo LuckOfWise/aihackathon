@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# Usage: bin/hack-finish "<pr title>" ["<pr body>"]
+# - worktree 内で実行する想定
+# - 全ての変更を commit -> push -> PR 作成
+set -euo pipefail
+
+if [ "$#" -lt 1 ]; then
+  echo "Usage: bin/hack-finish \"<pr title>\" [\"<pr body>\"]" >&2
+  echo "  例: bin/hack-finish \"feat: chat UI のスケルトン\"" >&2
+  exit 1
+fi
+
+TITLE="$1"
+BODY="${2:-}"
+
+CURRENT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+if [ "$CURRENT_BRANCH" = "main" ] || [ "$CURRENT_BRANCH" = "HEAD" ]; then
+  echo "[hack-finish] main では実行できません。bin/hack-start で worktree を作ってから使ってください。" >&2
+  exit 1
+fi
+
+# 変更があれば全部 add
+if [ -n "$(git status --porcelain)" ]; then
+  echo "[hack-finish] git add -A"
+  git add -A
+
+  echo "[hack-finish] git commit"
+  git commit -m "$TITLE"
+else
+  # 既に commit 済みで push だけ忘れているケース
+  if git diff --quiet origin/"$CURRENT_BRANCH" 2>/dev/null; then
+    echo "[hack-finish] コミットが何もありません。中断します。" >&2
+    exit 1
+  fi
+fi
+
+echo "[hack-finish] git push"
+git push -u origin "$CURRENT_BRANCH"
+
+echo "[hack-finish] gh pr create"
+if [ -z "$BODY" ]; then
+  BODY="$(printf '## 概要\n%s\n\n## 確認\n- [ ] ローカル動作確認\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)' "$TITLE")"
+fi
+
+# 既に PR がある場合は URL だけ返す
+if EXISTING_URL="$(gh pr view --json url --jq .url 2>/dev/null)"; then
+  echo "[hack-finish] 既に PR があります: ${EXISTING_URL}"
+  exit 0
+fi
+
+gh pr create --title "$TITLE" --body "$BODY" --base main --head "$CURRENT_BRANCH"

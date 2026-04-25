@@ -2,6 +2,21 @@
 
 このプロジェクトは **SG流・Claude協働前提** のRailsアプリ立ち上げ指示書に基づいて構築されている。
 
+## 🏁 ハッカソンモード（当日 / 最優先）
+
+**今日はハッカソン本番。残り時間は限られている。速度を最優先**。
+
+詳細は **[.claude/rules/hackathon-workflow.md](.claude/rules/hackathon-workflow.md)** に集約。全エージェント必読。
+
+**鉄則**:
+1. 必ず `bin/hack-start <branch>` で**最新 main から worktree** を生やして開発
+2. 完了後は必ず `bin/hack-finish "<title>"` で **commit → push → PR 作成**まで実行
+3. main 直接コミットは**ユーザー指示時のみ**躊躇なく実行（`git checkout main && git pull && commit && push`）
+4. テスト・lint・design レビューは速度に応じて省略可（CI 真っ赤を避ける最低限のみ）
+5. サブエージェントを起動するときは、プロンプトに**作業 worktree のフルパス**を必ず明記する
+
+通常の「拡張サイクル / 軽量サイクル」（後述）はハッカソン終了後の通常開発時に従うルール。当日は上記が優先。
+
 ## プロジェクト概要
 
 - **目的**: AIハッカソン向けのRailsベースアプリケーション

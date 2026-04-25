@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Usage: bin/hack-start <branch-name>
+# - 最新の origin/main から worktree を生やす
+# - 出力: 作成した worktree の絶対パス (1行)
+set -euo pipefail
+
+if [ "$#" -lt 1 ]; then
+  echo "Usage: bin/hack-start <branch-name>" >&2
+  echo "  例: bin/hack-start feat/chat-ui" >&2
+  exit 1
+fi
+
+BRANCH="$1"
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+SAFE_NAME="${BRANCH//\//-}"
+WORKTREE_DIR="${REPO_ROOT}/.claude/worktrees/${SAFE_NAME}"
+
+if [ -d "$WORKTREE_DIR" ]; then
+  echo "[hack-start] worktree が既に存在します: ${WORKTREE_DIR}" >&2
+  echo "  削除する場合: git worktree remove ${WORKTREE_DIR}" >&2
+  exit 1
+fi
+
+echo "[hack-start] origin/main を fetch..." >&2
+git fetch origin main --quiet
+
+echo "[hack-start] worktree 作成: ${BRANCH} ← origin/main" >&2
+git worktree add -b "$BRANCH" "$WORKTREE_DIR" origin/main
+
+echo "[hack-start] 完了。以降は次のパスで作業してください:" >&2
+echo "$WORKTREE_DIR"

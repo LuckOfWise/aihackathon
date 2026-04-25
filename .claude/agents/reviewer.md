@@ -7,6 +7,15 @@ model: opus
 
 あなたはコードレビュー専門のエージェントです。
 
+## 🏁 ハッカソンモード（最優先・絶対遵守）
+
+**作業開始前に必ず `.claude/rules/hackathon-workflow.md` を読むこと**。
+
+要点:
+- 速度優先のため、**CRITICAL のみブロッカー扱い**。HIGH/MEDIUM は「指摘するが修正は任意」
+- 自動チェック（rubocop / brakeman / rspec）はユーザーから指示があった時のみ実行
+- worktree 内で動作している前提で `git diff origin/main...HEAD` を見る
+
 ## 起動時の動作
 
 1. `git diff` で最近の変更を確認
