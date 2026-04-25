@@ -62,6 +62,7 @@ export default class extends Controller {
     'stageHero', 'stageUpload', 'stageAnalyzing', 'stageResult', 'stageVerdict', 'stageMatch',
     'flashOverlay',
     'fileInput',
+    'cameraOverlay', 'cameraVideo',
     'analyzingImg', 'overlaySvg', 'meshEdges', 'meshDots', 'bboxGroup', 'reticleGroup', 'tickGroup',
     'overlayLabels', 'scanLine', 'logPanel', 'progressFill', 'progressNum', 'progressBar',
     'resultCanvas', 'beforeImg', 'matchCanvas',
@@ -84,6 +85,9 @@ export default class extends Controller {
   declare stageMatchTarget: HTMLElement
   declare flashOverlayTarget: HTMLElement
   declare fileInputTarget: HTMLInputElement
+  declare cameraOverlayTarget: HTMLElement
+  declare cameraVideoTarget: HTMLVideoElement
+  declare hasCameraVideoTarget: boolean
   declare analyzingImgTarget: HTMLImageElement
   declare overlaySvgTarget: SVGSVGElement
   declare meshEdgesTarget: SVGGElement
@@ -117,6 +121,7 @@ export default class extends Controller {
   private abortController: AbortController | null = null
   private analysisRaf: number | null = null
   private qualityRetryCount = 0
+  private cameraStream: MediaStream | null = null
 
   connect(): void {
     this.buildMeshSvg()
@@ -130,6 +135,7 @@ export default class extends Controller {
       cancelAnimationFrame(this.analysisRaf)
       this.analysisRaf = null
     }
+    this.stopCameraStream()
   }
 
   gotoHero(): void { this.showStage('hero') }
@@ -143,7 +149,65 @@ export default class extends Controller {
     const input = event.currentTarget as HTMLInputElement
     const file = input.files?.[0]
     if (!file) return
+    await this.processImageFile(file)
+  }
 
+  async openCamera(): Promise<void> {
+    this.clearError()
+    if (!navigator.mediaDevices?.getUserMedia) {
+      this.showError('このブラウザはカメラをサポートしていません')
+      return
+    }
+    try {
+      this.cameraStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 1280 } },
+        audio: false,
+      })
+      this.cameraVideoTarget.srcObject = this.cameraStream
+      await this.cameraVideoTarget.play()
+      this.cameraOverlayTarget.removeAttribute('hidden')
+    } catch (err) {
+      this.stopCameraStream()
+      const msg = err instanceof Error && err.name === 'NotAllowedError'
+        ? 'カメラの使用が許可されていません'
+        : 'カメラを起動できませんでした'
+      this.showError(msg)
+    }
+  }
+
+  closeCamera(): void {
+    this.stopCameraStream()
+    this.cameraOverlayTarget.setAttribute('hidden', '')
+  }
+
+  async capturePhoto(): Promise<void> {
+    const video = this.cameraVideoTarget
+    if (!video.videoWidth || !video.videoHeight) return
+
+    const canvas = document.createElement('canvas')
+    canvas.width = video.videoWidth
+    canvas.height = video.videoHeight
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+
+    const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.92))
+    if (!blob) return
+    const file = new File([blob], 'camera-capture.jpg', { type: 'image/jpeg' })
+
+    this.closeCamera()
+    await this.processImageFile(file)
+  }
+
+  private stopCameraStream(): void {
+    this.cameraStream?.getTracks().forEach(t => t.stop())
+    this.cameraStream = null
+    if (this.hasCameraVideoTarget) {
+      this.cameraVideoTarget.srcObject = null
+    }
+  }
+
+  private async processImageFile(file: File): Promise<void> {
     this.clearError()
     this.qualityRetryCount = 0
 
