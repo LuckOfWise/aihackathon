@@ -7,6 +7,10 @@
   -webkit-font-smoothing: antialiased;
 }
 
+.shine-mate [hidden] {
+  display: none;
+}
+
 .shine-mate__flash {
   position: fixed;
   inset: 0;
