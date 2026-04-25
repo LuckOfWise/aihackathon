@@ -3,9 +3,8 @@ import type { FaceData, Intensity, Point } from '../types/face'
 interface EffectParams {
   catchlightOpacity: number
   catchlightRadiusFactor: number
-  saturationBoost: number
-  brightnessDelta: number
-  yellownessDelta: number
+  eyeFilter: string
+  teethFilter: string
   rayOpacity: number
   rayLengthFactor: number
   haloOpacity: number
@@ -17,44 +16,41 @@ interface EffectParams {
 
 const EFFECT_PARAMS: Record<Intensity, EffectParams> = {
   subtle: {
-    catchlightOpacity: 0.6,
-    catchlightRadiusFactor: 0.45,
-    saturationBoost: 18,
-    brightnessDelta: 15,
-    yellownessDelta: -10,
-    rayOpacity: 0.35,
-    rayLengthFactor: 1.6,
-    haloOpacity: 0.18,
-    haloRadiusFactor: 1.5,
-    teethHighlightOpacity: 0.25,
+    catchlightOpacity: 0.45,
+    catchlightRadiusFactor: 0.40,
+    eyeFilter: 'brightness(1.04) saturate(1.10) contrast(1.03)',
+    teethFilter: 'brightness(1.08) saturate(0.80) contrast(1.02)',
+    rayOpacity: 0.25,
+    rayLengthFactor: 1.4,
+    haloOpacity: 0.12,
+    haloRadiusFactor: 1.4,
+    teethHighlightOpacity: 0.12,
     sparkle: false,
     sparkleCount: 0,
   },
   standard: {
-    catchlightOpacity: 0.9,
-    catchlightRadiusFactor: 0.55,
-    saturationBoost: 40,
-    brightnessDelta: 28,
-    yellownessDelta: -22,
-    rayOpacity: 0.7,
-    rayLengthFactor: 2.6,
-    haloOpacity: 0.35,
-    haloRadiusFactor: 2.0,
-    teethHighlightOpacity: 0.55,
+    catchlightOpacity: 0.70,
+    catchlightRadiusFactor: 0.48,
+    eyeFilter: 'brightness(1.08) saturate(1.22) contrast(1.06)',
+    teethFilter: 'brightness(1.14) saturate(0.62) contrast(1.04)',
+    rayOpacity: 0.50,
+    rayLengthFactor: 2.2,
+    haloOpacity: 0.22,
+    haloRadiusFactor: 1.8,
+    teethHighlightOpacity: 0.22,
     sparkle: false,
     sparkleCount: 0,
   },
   sparkle: {
-    catchlightOpacity: 1.0,
-    catchlightRadiusFactor: 0.65,
-    saturationBoost: 60,
-    brightnessDelta: 40,
-    yellownessDelta: -30,
-    rayOpacity: 0.95,
-    rayLengthFactor: 3.4,
-    haloOpacity: 0.55,
-    haloRadiusFactor: 2.6,
-    teethHighlightOpacity: 0.75,
+    catchlightOpacity: 0.90,
+    catchlightRadiusFactor: 0.58,
+    eyeFilter: 'brightness(1.12) saturate(1.35) contrast(1.08)',
+    teethFilter: 'brightness(1.20) saturate(0.48) contrast(1.05)',
+    rayOpacity: 0.80,
+    rayLengthFactor: 3.0,
+    haloOpacity: 0.38,
+    haloRadiusFactor: 2.3,
+    teethHighlightOpacity: 0.35,
     sparkle: true,
     sparkleCount: 6,
   },
@@ -90,124 +86,63 @@ function clipToPolygon(
   ctx.clip()
 }
 
-const FEATHER_PX = 2
+const FEATHER_PX = 3
 
-// putImageData は ctx.clip() を無視するため、ポリゴン内かどうかを自前で判定する。
-// エッジ付近は FEATHER_PX で滑らかにフェードさせ、矩形っぽい境界を消す。
-function pointInPolygon(x: number, y: number, polygon: Point[]): boolean {
-  let inside = false
-  const n = polygon.length
-  for (let i = 0, j = n - 1; i < n; j = i++) {
-    const xi = polygon[i].x
-    const yi = polygon[i].y
-    const xj = polygon[j].x
-    const yj = polygon[j].y
-    if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) {
-      inside = !inside
-    }
-  }
-  return inside
-}
-
-function pointToSegmentDistance(
-  px: number, py: number,
-  ax: number, ay: number,
-  bx: number, by: number,
-): number {
-  const dx = bx - ax
-  const dy = by - ay
-  const lenSq = dx * dx + dy * dy
-  if (lenSq === 0) return Math.hypot(px - ax, py - ay)
-  const t = Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / lenSq))
-  return Math.hypot(px - (ax + t * dx), py - (ay + t * dy))
-}
-
-function distanceToPolygonEdge(x: number, y: number, polygon: Point[]): number {
-  let minDist = Infinity
-  const n = polygon.length
-  for (let i = 0; i < n; i++) {
-    const a = polygon[i]
-    const b = polygon[(i + 1) % n]
-    const d = pointToSegmentDistance(x, y, a.x, a.y, b.x, b.y)
-    if (d < minDist) minDist = d
-  }
-  return minDist
-}
-
-function applyBrightnessYellowness(
+// 元画像のテクスチャを保ちつつ明るさ/彩度/コントラストだけ持ち上げるために、
+// ポリゴン範囲を一度オフスクリーンに複写し、CSS filter で色補正したあと
+// ぼかしたポリゴンマスクで destination-in 合成して本体に戻す。
+// 各ピクセルを加算で飛ばす従来方式と違い、元のディテールが残るので
+// 「ベタ塗り」感が出ない。
+function applyFilterToRegion(
   ctx: CanvasRenderingContext2D,
   polygon: Point[],
-  brightness: number,
-  yellowness: number,
+  filterCss: string,
 ): void {
+  if (!filterCss || filterCss === 'none') return
+
   const xs = polygon.map((p) => p.x)
   const ys = polygon.map((p) => p.y)
-  const minX = Math.floor(Math.min(...xs))
-  const minY = Math.floor(Math.min(...ys))
-  const maxX = Math.ceil(Math.max(...xs))
-  const maxY = Math.ceil(Math.max(...ys))
+  const pad = FEATHER_PX + 2
+  const minX = Math.max(0, Math.floor(Math.min(...xs)) - pad)
+  const minY = Math.max(0, Math.floor(Math.min(...ys)) - pad)
+  const maxX = Math.min(ctx.canvas.width, Math.ceil(Math.max(...xs)) + pad)
+  const maxY = Math.min(ctx.canvas.height, Math.ceil(Math.max(...ys)) + pad)
   const w = maxX - minX
   const h = maxY - minY
   if (w <= 0 || h <= 0) return
 
-  const imageData = ctx.getImageData(minX, minY, w, h)
-  const data = imageData.data
-  for (let py = 0; py < h; py++) {
-    for (let px = 0; px < w; px++) {
-      const gx = minX + px + 0.5
-      const gy = minY + py + 0.5
-      if (!pointInPolygon(gx, gy, polygon)) continue
-      const edge = distanceToPolygonEdge(gx, gy, polygon)
-      const k = Math.min(1, edge / FEATHER_PX)
-      const i = (py * w + px) * 4
-      data[i] = Math.min(255, data[i] + (brightness - yellowness) * k)
-      data[i + 1] = Math.min(255, data[i + 1] + brightness * k)
-      data[i + 2] = Math.min(255, data[i + 2] + (brightness + yellowness) * k)
-    }
-  }
-  ctx.putImageData(imageData, minX, minY)
-}
+  // 1) 元領域を offscreen へコピーしつつ filter で色補正
+  const filtered = document.createElement('canvas')
+  filtered.width = w
+  filtered.height = h
+  const fctx = filtered.getContext('2d')
+  if (!fctx) return
+  fctx.filter = filterCss
+  fctx.drawImage(ctx.canvas, minX, minY, w, h, 0, 0, w, h)
+  fctx.filter = 'none'
 
-function applySaturation(
-  ctx: CanvasRenderingContext2D,
-  polygon: Point[],
-  saturationPercent: number,
-): void {
-  if (saturationPercent === 0) return
-  const xs = polygon.map((p) => p.x)
-  const ys = polygon.map((p) => p.y)
-  const minX = Math.floor(Math.min(...xs))
-  const minY = Math.floor(Math.min(...ys))
-  const maxX = Math.ceil(Math.max(...xs))
-  const maxY = Math.ceil(Math.max(...ys))
-  const w = maxX - minX
-  const h = maxY - minY
-  if (w <= 0 || h <= 0) return
-
-  const imageData = ctx.getImageData(minX, minY, w, h)
-  const data = imageData.data
-  const factor = 1 + saturationPercent / 100
-  for (let py = 0; py < h; py++) {
-    for (let px = 0; px < w; px++) {
-      const gx = minX + px + 0.5
-      const gy = minY + py + 0.5
-      if (!pointInPolygon(gx, gy, polygon)) continue
-      const edge = distanceToPolygonEdge(gx, gy, polygon)
-      const k = Math.min(1, edge / FEATHER_PX)
-      const i = (py * w + px) * 4
-      const r = data[i]
-      const g = data[i + 1]
-      const b = data[i + 2]
-      const gray = 0.299 * r + 0.587 * g + 0.114 * b
-      const nr = Math.min(255, Math.max(0, gray + (r - gray) * factor))
-      const ng = Math.min(255, Math.max(0, gray + (g - gray) * factor))
-      const nb = Math.min(255, Math.max(0, gray + (b - gray) * factor))
-      data[i] = r + (nr - r) * k
-      data[i + 1] = g + (ng - g) * k
-      data[i + 2] = b + (nb - b) * k
-    }
+  // 2) マスクを作成（白塗りポリゴンにブラーでフェザー）
+  const mask = document.createElement('canvas')
+  mask.width = w
+  mask.height = h
+  const mctx = mask.getContext('2d')
+  if (!mctx) return
+  mctx.filter = `blur(${FEATHER_PX}px)`
+  mctx.fillStyle = '#fff'
+  mctx.beginPath()
+  mctx.moveTo(polygon[0].x - minX, polygon[0].y - minY)
+  for (let i = 1; i < polygon.length; i++) {
+    mctx.lineTo(polygon[i].x - minX, polygon[i].y - minY)
   }
-  ctx.putImageData(imageData, minX, minY)
+  mctx.closePath()
+  mctx.fill()
+
+  // 3) filtered をマスクで切り抜き
+  fctx.globalCompositeOperation = 'destination-in'
+  fctx.drawImage(mask, 0, 0)
+
+  // 4) 本体に戻す（fillRect ではなく drawImage なので clip の影響は受けない）
+  ctx.drawImage(filtered, minX, minY)
 }
 
 function drawCatchlight(
@@ -365,13 +300,12 @@ function processEye(
   const cy = eye.iris_center.y * h
   const irisRadius = eye.iris_radius * Math.min(w, h)
 
-  // Clip to eye polygon for inside-eye effects
+  // 虹彩の色補正（元のテクスチャを保ちつつ brightness/saturate/contrast）
+  applyFilterToRegion(ctx, polygon, params.eyeFilter)
+
+  // キャッチライトは clip 内で合成
   ctx.save()
   clipToPolygon(ctx, polygon)
-  if (params.saturationBoost > 0) {
-    applySaturation(ctx, polygon, params.saturationBoost)
-  }
-  applyBrightnessYellowness(ctx, polygon, params.brightnessDelta * 0.6, 0)
   drawCatchlight(ctx, cx, cy, irisRadius, params.catchlightOpacity, params.catchlightRadiusFactor)
   ctx.restore()
 
@@ -394,13 +328,12 @@ function processTeeth(
   const area = polygonArea(polygon)
   if (area / (w * h) < MIN_POLYGON_AREA_RATIO) return null
 
+  // 歯の色補正（明るさ +, 彩度 -, 少しコントラスト —— 自然に白く見える）
+  applyFilterToRegion(ctx, polygon, params.teethFilter)
+
+  // うっすらハイライトのグラデーション（控えめに）
   ctx.save()
   clipToPolygon(ctx, polygon)
-  applyBrightnessYellowness(ctx, polygon, params.brightnessDelta, params.yellownessDelta)
-  // saturate toward white by desaturating + brightening
-  if (params.saturationBoost > 0) {
-    applySaturation(ctx, polygon, -params.saturationBoost * 0.8)
-  }
   drawTeethHighlight(ctx, polygon, params.teethHighlightOpacity)
   ctx.restore()
 
@@ -444,18 +377,35 @@ export function composeFaceEffect(
     const seedPoints: { x: number; y: number; size: number }[] = []
     if (leftEye) seedPoints.push({ x: leftEye.cornerX, y: leftEye.cornerY, size: leftEye.irisRadius * 0.9 })
     if (rightEye) seedPoints.push({ x: rightEye.cornerX, y: rightEye.cornerY, size: rightEye.irisRadius * 0.9 })
-    if (teethCenter) seedPoints.push({ x: teethCenter.centerX, y: teethCenter.centerY, size: Math.min(w, h) * 0.02 })
+    if (teethCenter) {
+      // 真ん中に置くと顔の対称軸と被って目立たないので、右寄せ + 少し上
+      const offsetX = Math.min(w, h) * 0.04
+      const offsetY = -Math.min(w, h) * 0.015
+      seedPoints.push({
+        x: teethCenter.centerX + offsetX,
+        y: teethCenter.centerY + offsetY,
+        size: Math.min(w, h) * 0.025,
+      })
+    }
 
     for (const p of seedPoints) {
       drawSparkleStar(ctx, p.x, p.y, p.size)
     }
-    // Scatter extra sparkles around each eye
+    // Scatter extra sparkles around each eye toward the outer-upper arc only
+    // (顔の外側 + 上方 120° 程度に寄せて非対称感を出す)
+    const faceCenterX = w / 2
     const scatterEyes = [leftEye, rightEye].filter(Boolean) as NonNullable<typeof leftEye>[]
     for (const eye of scatterEyes) {
+      const isOuterRight = eye.cx >= faceCenterX
+      // Canvas は Y-down。上方=sin<0。外側右 -> cos>0、外側左 -> cos<0。
+      // base 角度を外側・上方に向け、±60° の扇型に ばらす。
+      const baseAngle = isOuterRight ? -Math.PI / 4 : -Math.PI * 3 / 4
+      const arcSpan = Math.PI * 2 / 3  // 120°
       for (let i = 0; i < params.sparkleCount; i++) {
-        const angle = (i / params.sparkleCount) * Math.PI * 2 + 0.3
-        const dist = eye.irisRadius * (1.8 + (i % 3) * 0.4)
-        const size = eye.irisRadius * (0.25 + (i % 2) * 0.15)
+        const t = params.sparkleCount === 1 ? 0.5 : i / (params.sparkleCount - 1)
+        const angle = baseAngle + (t - 0.5) * arcSpan
+        const dist = eye.irisRadius * (1.6 + (i % 3) * 0.5)
+        const size = eye.irisRadius * (0.28 + (i % 2) * 0.18)
         drawSparkleStar(ctx, eye.cx + Math.cos(angle) * dist, eye.cy + Math.sin(angle) * dist, size)
       }
     }
