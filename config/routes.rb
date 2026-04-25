@@ -14,6 +14,7 @@ Rails.application.routes.draw do
   namespace :api do
     resources :face_analyses, only: :create
     resources :shine_reviews, only: :create
+    resources :enhancements, only: :create
   end
 
   namespace :debug do

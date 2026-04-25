@@ -1,6 +1,6 @@
 import { Controller } from '@hotwired/stimulus'
 import { resizeToBase64, dataUrlToBlob } from '../lib/image_resize'
-import { composeFaceEffect, canvasToBlob, imageToCanvas } from '../lib/compose'
+import { composeFaceEffect, composeFilterOnly, canvasToBlob, imageToCanvas } from '../lib/compose'
 import { detectFaceFromDataUrl, preloadFaceLandmarker } from '../lib/face_landmarker'
 import { postSse } from '../lib/sse_client'
 import type { FaceData, Intensity, Point } from '../types/face'
@@ -9,7 +9,7 @@ type Stage = 'hero' | 'upload' | 'analyzing' | 'result' | 'verdict' | 'match'
 
 const ANALYSIS_LOG = [
   '▸ Booting SHINE-MATE engine v0.9.3',
-  '▸ claude-haiku-4-5 · context loaded (1024 tok)',
+  '▸ KICKHOST core · context loaded (1024 tok)',
   '▸ Detecting face geometry…',
   '✓ Face detected · confidence 0.97',
   '▸ Generating 478-point FaceMesh',
@@ -21,7 +21,7 @@ const ANALYSIS_LOG = [
   '✓ Enamel mask · 48×20 · ΔL* +18.4',
   '▸ Computing SHINE_INDEX',
   '✓ Δ ATTRACT = +38.4 pt',
-  '▸ Asking Claude for editorial verdict…',
+  '▸ Asking KICKHOST for editorial verdict…',
   '✓ Verdict received · "Quiet Radiance"',
   '✦ SHINE-MATE complete. Display.',
 ] as const
@@ -682,12 +682,13 @@ export default class extends Controller {
   private async buildResultCanvas(intensity: Intensity): Promise<HTMLCanvasElement | null> {
     if (!this.faceData) return null
 
-    // overdo: CodeFormer で復元された高画質画像 + Canvas filter（overdo）の輝き合成
+    // overdo: CodeFormer で復元された高画質画像 + 目・歯の領域のみ filter で強調
+    // （catchlight や sparkle 等のオーバーレイは使わずフォトリアル寄りに）
     if (intensity === 'overdo' && this.enhancedImageUrl) {
       try {
         const img = await this.loadImage(this.enhancedImageUrl, /* crossOrigin */ true)
         const sourceCanvas = imageToCanvas(img)
-        return composeFaceEffect(sourceCanvas, this.faceData, 'overdo')
+        return composeFilterOnly(sourceCanvas, this.faceData)
       } catch (err) {
         console.warn('Enhanced image load failed, falling back to local compose:', err)
       }

@@ -39,7 +39,7 @@ class Api::ShineReviewsController < Api::ApplicationController
 
     comment_thread  = Thread.new { stream_comment(shined_data_url) }
     score_thread    = Thread.new { fetch_score(original_data_url, shined_data_url) }
-    validate_thread = Thread.new { fetch_validation(shined_data_url) } if validate && intensity == 'sparkle'
+    validate_thread = Thread.new { fetch_validation(shined_data_url) } if validate && %w[sparkle overdo].include?(intensity)
 
     comment_thread.join
 

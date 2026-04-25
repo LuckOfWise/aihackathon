@@ -15,19 +15,6 @@ interface EffectParams {
 }
 
 const EFFECT_PARAMS: Record<Intensity, EffectParams> = {
-  subtle: {
-    catchlightOpacity: 0.35,
-    catchlightRadiusFactor: 0.32,
-    eyeFilter: 'brightness(1.04) saturate(1.08) contrast(1.02)',
-    teethFilter: 'brightness(1.06) saturate(0.85) contrast(1.02)',
-    rayOpacity: 0,
-    rayLengthFactor: 0,
-    haloOpacity: 0,
-    haloRadiusFactor: 0,
-    teethHighlightOpacity: 0.10,
-    sparkle: false,
-    sparkleCount: 0,
-  },
   standard: {
     catchlightOpacity: 0.55,
     catchlightRadiusFactor: 0.42,
@@ -53,6 +40,21 @@ const EFFECT_PARAMS: Record<Intensity, EffectParams> = {
     teethHighlightOpacity: 0.55,
     sparkle: true,
     sparkleCount: 6,
+  },
+  // overdo は通常 Replicate 生成画像で上書きされるため Canvas filter は使われないが、
+  // Replicate 失敗時のフォールバック用に sparkle を継承した強めの値を設定。
+  overdo: {
+    catchlightOpacity: 1.0,
+    catchlightRadiusFactor: 0.85,
+    eyeFilter: 'brightness(1.45) saturate(1.95) contrast(1.25)',
+    teethFilter: 'brightness(1.26) saturate(0.42) contrast(1.08)',
+    rayOpacity: 0.95,
+    rayLengthFactor: 3.4,
+    haloOpacity: 0.65,
+    haloRadiusFactor: 2.6,
+    teethHighlightOpacity: 0.55,
+    sparkle: true,
+    sparkleCount: 8,
   },
 }
 
@@ -378,6 +380,43 @@ function processTeeth(
   const centerY = polygon.reduce((sum, p) => sum + p.y, 0) / polygon.length
 
   return { centerX, centerY }
+}
+
+// オーバーレイ（catchlight / halo / star rays / sparkle / teeth highlight）を一切使わず、
+// 目と歯の領域のみを CSS filter で強調するフォトリアル合成。
+// Replicate (CodeFormer) で復元された画像の上に乗せる用途。
+const FILTER_ONLY_EYE = 'brightness(1.55) saturate(2.10) contrast(1.30)'
+const FILTER_ONLY_TEETH = 'brightness(1.38) saturate(0.32) contrast(1.10)'
+
+export function composeFilterOnly(
+  sourceCanvas: HTMLCanvasElement,
+  face: FaceData,
+): HTMLCanvasElement {
+  const w = sourceCanvas.width
+  const h = sourceCanvas.height
+
+  const output = document.createElement('canvas')
+  output.width = w
+  output.height = h
+  const ctx = output.getContext('2d')
+  if (!ctx) throw new Error('Canvas 2D context unavailable')
+  ctx.drawImage(sourceCanvas, 0, 0)
+
+  for (const eye of [face.eyes.left, face.eyes.right]) {
+    if (eye.state === 'closed') continue
+    const polygon = scalePoints(eye.eye_polygon, w, h)
+    if (polygonArea(polygon) / (w * h) < MIN_POLYGON_AREA_RATIO) continue
+    applyFilterToRegion(ctx, polygon, FILTER_ONLY_EYE)
+  }
+
+  if (face.mouth.state === 'open_showing_teeth' && face.mouth.teeth_polygon) {
+    const polygon = scalePoints(face.mouth.teeth_polygon, w, h)
+    if (polygonArea(polygon) / (w * h) >= MIN_POLYGON_AREA_RATIO) {
+      applyFilterToRegion(ctx, polygon, FILTER_ONLY_TEETH)
+    }
+  }
+
+  return output
 }
 
 export function composeFaceEffect(

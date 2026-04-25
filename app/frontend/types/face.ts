@@ -1,4 +1,4 @@
-export type Intensity = 'subtle' | 'standard' | 'sparkle'
+export type Intensity = 'standard' | 'sparkle' | 'overdo'
 
 export interface Point {
   x: number
