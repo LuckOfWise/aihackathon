@@ -52,7 +52,9 @@
 }
 
 .face-shine-debug__canvas {
+  display: block;
   max-width: 100%;
+  height: auto;
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
 }
