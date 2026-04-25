@@ -38,6 +38,9 @@ gem 'thruster', require: false
 # Active Storage variants
 gem 'image_processing', '~> 1.2'
 
+# Active Storage S3 adapter
+gem 'aws-sdk-s3', require: false
+
 # i18n & locale
 gem 'rails-i18n'
 
