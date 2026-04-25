@@ -3,7 +3,7 @@ import { resizeToBase64, dataUrlToBlob } from '../lib/image_resize'
 import { composeFaceEffect, canvasToBlob, imageToCanvas } from '../lib/compose'
 import { detectFaceFromDataUrl, preloadFaceLandmarker } from '../lib/face_landmarker'
 import { postSse } from '../lib/sse_client'
-import type { FaceData, Intensity } from '../types/face'
+import type { FaceData, Intensity, Point } from '../types/face'
 
 type Stage = 'hero' | 'upload' | 'analyzing' | 'result' | 'verdict' | 'match'
 
@@ -120,10 +120,13 @@ export default class extends Controller {
   private faceData: FaceData | null = null
   private composedCanvas: HTMLCanvasElement | null = null
   private enhancedImageUrl: string | null = null
+  private enhancedImagePromise: Promise<void> | null = null
   private abortController: AbortController | null = null
   private analysisRaf: number | null = null
   private qualityRetryCount = 0
   private cameraStream: MediaStream | null = null
+  private metricRafs: number[] = []
+  private currentMetrics = { eye: 0, enamel: 0, attract: 0 }
 
   connect(): void {
     this.buildMeshSvg()
@@ -246,12 +249,14 @@ export default class extends Controller {
     this.intensityValue = detail.intensity
     if (!this.faceData || !this.originalDataUrl) return
 
-    // sparkle に切り替わって、まだ Replicate 結果が無いなら生成しに行く。
-    // analyzing 画面を再利用してアニメーションで待ち時間を埋める。
-    if (this.intensityValue === 'sparkle' && !this.enhancedImageUrl) {
+    // overdo （やりすぎる）に切り替わって Replicate 結果がまだ届いていなければ
+    // analyzing 画面を再利用して待ち時間を埋める（裏で fetch は走り続けている）。
+    if (this.intensityValue === 'overdo' && !this.enhancedImageUrl) {
       this.showStage('analyzing')
       this.startAnalysisAnimation()
-      await this.fetchEnhancedImage()
+      if (this.enhancedImagePromise) {
+        await this.enhancedImagePromise
+      }
       await this.waitForAnimationEnd()
     }
 
@@ -599,10 +604,10 @@ export default class extends Controller {
     this.faceData = face
     this.enhancedImageUrl = null
 
-    // sparkle のときだけ Replicate を叩く。subtle/standard は従来の Canvas filter のまま。
-    if (this.intensityValue === 'sparkle') {
-      await this.fetchEnhancedImage()
-    }
+    // 「やりすぎる」用の Replicate 生成は裏で先行投げ。compose は待たずに進む。
+    // ユーザーが「やりすぎる」を選んだ時点で enhancedImageUrl があれば即座に切替、
+    // まだなら analyzing 画面を再利用してこの promise を await する。
+    this.enhancedImagePromise = this.fetchEnhancedImage()
 
     await this.waitForAnimationAndCompose()
   }
@@ -641,11 +646,15 @@ export default class extends Controller {
       setTimeout(check, 200)
     })
 
-    await this.compose(this.intensityValue)
+    await this.compose(this.intensityValue, { isInitial: true })
   }
 
-  private async compose(intensity: Intensity, retryCount = 0): Promise<void> {
+  private async compose(
+    intensity: Intensity,
+    options: { isInitial?: boolean; retryCount?: number } = {},
+  ): Promise<void> {
     if (!this.originalDataUrl || !this.faceData) return
+    const { isInitial = false, retryCount = 0 } = options
 
     const resultCanvas = await this.buildResultCanvas(intensity)
     if (!resultCanvas) return
@@ -660,26 +669,31 @@ export default class extends Controller {
     ctx.drawImage(resultCanvas, 0, 0)
 
     this.beforeImgTarget.src = this.originalDataUrl
-
-    this.triggerFlash()
     this.showStage('result')
 
-    await this.review(resultCanvas, intensity, retryCount)
+    // intensity 切替時は flash や review を再実行しない（"再読み込み感" の解消）。
+    if (isInitial) {
+      this.triggerFlash()
+      this.updateMetricsAnimated(intensity)
+      await this.review(resultCanvas, intensity, retryCount)
+    }
   }
 
   private async buildResultCanvas(intensity: Intensity): Promise<HTMLCanvasElement | null> {
-    // sparkle のときだけ Replicate 生成画像を使う。subtle/standard は Canvas filter のまま。
-    // sparkle でも Replicate に失敗していれば Canvas filter にフォールバック。
-    if (intensity === 'sparkle' && this.enhancedImageUrl) {
+    if (!this.faceData) return null
+
+    // overdo: CodeFormer で復元された高画質画像 + Canvas filter（overdo）の輝き合成
+    if (intensity === 'overdo' && this.enhancedImageUrl) {
       try {
         const img = await this.loadImage(this.enhancedImageUrl, /* crossOrigin */ true)
-        return imageToCanvas(img)
+        const sourceCanvas = imageToCanvas(img)
+        return composeFaceEffect(sourceCanvas, this.faceData, 'overdo')
       } catch (err) {
         console.warn('Enhanced image load failed, falling back to local compose:', err)
       }
     }
 
-    if (!this.originalDataUrl || !this.faceData) return null
+    if (!this.originalDataUrl) return null
     const img = await this.loadImage(this.originalDataUrl, false)
     const sourceCanvas = imageToCanvas(img)
     return composeFaceEffect(sourceCanvas, this.faceData, intensity)
@@ -709,7 +723,7 @@ export default class extends Controller {
     formData.append('original_file', originalBlob, 'original.jpg')
     formData.append('shined_file', shinedBlob, 'shined.jpg')
     formData.append('intensity', intensity)
-    formData.append('validate', String(intensity === 'sparkle'))
+    formData.append('validate', String(intensity === 'sparkle' || intensity === 'overdo'))
 
     this.abortController?.abort()
     this.abortController = new AbortController()
@@ -728,7 +742,9 @@ export default class extends Controller {
           },
           score: ({ score }) => {
             this.scoreDisplayTarget.textContent = `SHINE INDEX · ${score} / 100`
-            this.metricAttractTarget.textContent = `+${(score * 0.38).toFixed(1)}`
+            const target = score * 0.38
+            this.animateMetric(this.metricAttractTarget, this.currentMetrics.attract, target, (v) => `+${v.toFixed(1)}`, 700)
+            this.currentMetrics.attract = target
           },
           validate: ({ ok }) => {
             qualityOk = ok
@@ -739,7 +755,7 @@ export default class extends Controller {
       )
 
       if (!qualityOk && retryCount < MAX_QUALITY_RETRIES) {
-        await this.compose(intensity, retryCount + 1)
+        await this.compose(intensity, { isInitial: true, retryCount: retryCount + 1 })
       }
     } catch (err) {
       if ((err as Error).name === 'AbortError') return
@@ -754,6 +770,94 @@ export default class extends Controller {
   private async recompose(): Promise<void> {
     if (!this.faceData || !this.originalDataUrl) return
     await this.compose(this.intensityValue)
+  }
+
+  // 検出された目/歯のエリア + 選択 intensity から、瞳の輝き / 歯の白さの増分を推定。
+  // attract は server score 到着後に動的に上書きされるが、それまで仮値を出す。
+  private updateMetricsAnimated(intensity: Intensity): void {
+    if (!this.faceData) return
+
+    const eyeBaseByIntensity: Record<Intensity, number> = { standard: 10, sparkle: 22, overdo: 38 }
+    const enamelBaseByIntensity: Record<Intensity, number> = { standard: 14, sparkle: 26, overdo: 42 }
+    const attractEstByIntensity: Record<Intensity, number> = { standard: 18, sparkle: 28, overdo: 36 }
+
+    const leftOpen = this.faceData.eyes.left.state === 'open'
+    const rightOpen = this.faceData.eyes.right.state === 'open'
+    const eyeAreaLeft = leftOpen ? polygonAreaNorm(this.faceData.eyes.left.eye_polygon) : 0
+    const eyeAreaRight = rightOpen ? polygonAreaNorm(this.faceData.eyes.right.eye_polygon) : 0
+    const eyeAreaAvg = (eyeAreaLeft + eyeAreaRight) / 2
+    const eyeBoost = clamp(eyeAreaAvg * 1500, 0, 14)
+    const eyeJitter = (this.deterministicJitter('eye', intensity) - 0.5) * 4
+    const eyeDelta = leftOpen || rightOpen
+      ? Math.max(2, Math.round(eyeBaseByIntensity[intensity] + eyeBoost + eyeJitter))
+      : 0
+
+    const showsTeeth = this.faceData.mouth.state === 'open_showing_teeth' && !!this.faceData.mouth.teeth_polygon
+    const teethArea = showsTeeth && this.faceData.mouth.teeth_polygon
+      ? polygonAreaNorm(this.faceData.mouth.teeth_polygon)
+      : 0
+    const teethBoost = clamp(teethArea * 900, 0, 12)
+    const enamelJitter = (this.deterministicJitter('enamel', intensity) - 0.5) * 4
+    const enamelDelta = showsTeeth
+      ? Math.max(3, Math.round(enamelBaseByIntensity[intensity] + teethBoost + enamelJitter))
+      : 0
+
+    const attractEst = attractEstByIntensity[intensity] + eyeBoost * 0.2 + teethBoost * 0.15
+
+    this.animateMetric(
+      this.metricEyeTarget,
+      this.currentMetrics.eye,
+      eyeDelta,
+      (v) => eyeDelta === 0 ? '—' : `+${Math.round(v)}%`,
+      650,
+    )
+    this.animateMetric(
+      this.metricEnamelTarget,
+      this.currentMetrics.enamel,
+      enamelDelta,
+      (v) => enamelDelta === 0 ? '—' : `+${Math.round(v)}%`,
+      650,
+    )
+    this.animateMetric(
+      this.metricAttractTarget,
+      this.currentMetrics.attract,
+      attractEst,
+      (v) => `+${v.toFixed(1)}`,
+      650,
+    )
+
+    this.currentMetrics = { eye: eyeDelta, enamel: enamelDelta, attract: attractEst }
+  }
+
+  // 0..1 の決定的擬似乱数。intensity と key で値が変わり、同じ条件では再現する。
+  private deterministicJitter(key: string, intensity: Intensity): number {
+    let h = 2166136261
+    const s = key + intensity
+    for (let i = 0; i < s.length; i++) {
+      h ^= s.charCodeAt(i)
+      h = Math.imul(h, 16777619)
+    }
+    return ((h >>> 0) % 1000) / 1000
+  }
+
+  private animateMetric(
+    target: HTMLElement,
+    fromVal: number,
+    toVal: number,
+    format: (v: number) => string,
+    durationMs: number,
+  ): void {
+    const start = performance.now()
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / durationMs)
+      const eased = 1 - Math.pow(1 - t, 3)
+      const v = fromVal + (toVal - fromVal) * eased
+      target.textContent = format(v)
+      if (t < 1) {
+        this.metricRafs.push(requestAnimationFrame(tick))
+      }
+    }
+    this.metricRafs.push(requestAnimationFrame(tick))
   }
 
   private renderMatchCard(): void {
@@ -774,4 +878,18 @@ export default class extends Controller {
     this.errorMessageTarget.textContent = message
     this.errorMessageTarget.removeAttribute('hidden')
   }
+}
+
+function clamp(v: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, v))
+}
+
+function polygonAreaNorm(points: Point[]): number {
+  let area = 0
+  const n = points.length
+  for (let i = 0; i < n; i++) {
+    const j = (i + 1) % n
+    area += points[i].x * points[j].y - points[j].x * points[i].y
+  }
+  return Math.abs(area) / 2
 }
