@@ -18,7 +18,7 @@
     "prettier": "^3.0.0",
     "stylelint": "^16.0.0",
     "typescript": "latest",
-    "vite": "^8.0.9",
+    "vite": "^8.0.16",
     "vite-plugin-ruby": "^5.2.1"
   },
   "dependencies": {
